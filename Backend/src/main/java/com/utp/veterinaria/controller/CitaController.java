@@ -39,7 +39,6 @@ public class CitaController {
         }
     }
 
-    // --- ENDPOINT ACTUALIZADO ---
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA')")
     public ResponseEntity<Cita> actualizarCita(@PathVariable Long id, @RequestBody CitaDto citaDto) {
