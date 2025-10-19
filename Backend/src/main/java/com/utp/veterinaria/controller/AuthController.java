@@ -54,7 +54,6 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtProvider.generateToken(authentication);
             
-            // Si tiene éxito, devuelve 200 OK con el JWT
             return new ResponseEntity<>(new JwtDto(token), HttpStatus.OK);
 
         } catch (org.springframework.security.core.AuthenticationException e) {
