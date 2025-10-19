@@ -1,17 +1,25 @@
-name: CI/CD Docker Push
+# Nombre del workflow de GitHub Actions
+name: Optimized CI/CD Docker Push
+
+# Disparador: Se ejecuta en cada push a la rama 'main'
 on:
   push:
     branches:
       - main
+
 jobs:
+  # Job 1: Revisa qué carpetas han cambiado (Backend o Frontend)
   check_changes:
     runs-on: ubuntu-latest
     outputs:
       backend_changed: ${{ steps.filter.outputs.backend }}
       frontend_changed: ${{ steps.filter.outputs.frontend }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Detect Changes
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -20,28 +28,23 @@ jobs:
             frontend:
               - 'Frontend/**'
 
+  # Job 2: Construye y publica la imagen de Docker del Backend
   build_and_push_backend:
     runs-on: ubuntu-latest
     needs: [check_changes]
+    # Condición: Solo se ejecuta si hubo cambios en la carpeta 'Backend'
     if: needs.check_changes.outputs.backend_changed == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 17 with Maven Cache
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+          # OPTIMIZACIÓN: Esta línea ya gestiona la caché de dependencias de Maven de forma nativa.
           cache: 'maven'
-
-      - name: Cache Maven Dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('Backend/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
 
       - name: Build and Package Spring Boot JAR
         run: mvn -f Backend/pom.xml clean install -DskipTests
@@ -59,27 +62,34 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/veterinaria-backend:latest
           file: ./Backend/Dockerfile
+          # OPTIMIZACIÓN CLAVE: Usa el registro de Docker Hub como caché para acelerar builds futuros.
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/veterinaria-backend:latest
+          cache-to: type=inline
 
+  # Job 3: Construye y publica la imagen de Docker del Frontend
   build_and_push_frontend:
     runs-on: ubuntu-latest
     needs: [check_changes]
+    # Condición: Solo se ejecuta si hubo cambios en la carpeta 'Frontend'
     if: needs.check_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 20 with NPM Cache
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          # OPTIMIZACIÓN: Gestión nativa de la caché de dependencias de NPM.
           cache: 'npm'
           cache-dependency-path: 'Frontend/package-lock.json'
       
       - name: Install Frontend Dependencies
-        run: npm install
+        # OPTIMIZACIÓN: 'npm ci' es más rápido y seguro para entornos de CI que 'npm install'.
+        run: npm ci
         working-directory: ./Frontend
 
-      - name: Build Angular Application (Production)
+      - name: Build Angular Application
         run: npm run build -- --output-path=dist
         working-directory: ./Frontend
 
@@ -96,36 +106,37 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/veterinaria-frontend:latest
           file: ./Frontend/Dockerfile
+          # OPTIMIZACIÓN CLAVE: Usa el registro de Docker Hub como caché para acelerar builds futuros.
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/veterinaria-frontend:latest
+          cache-to: type=inline
           
+  # Job 4: Despliega las imágenes actualizadas en la máquina virtual (VM)
   deploy_to_vm:
-      runs-on: ubuntu-latest
-      # DEPENDENCIAS: Depende de que las construcciones terminen (sean exitosas o saltadas)
-      needs: [build_and_push_backend, build_and_push_frontend]
-      
-      # CORRECCIÓN CLAVE: Esta condición permite la ejecución si al menos UNA construcción fue exitosa,
-      # ignorando si la otra se saltó ('skipped').
-      if: ${{ always() && (needs.build_and_push_backend.result == 'success' || needs.build_and_push_frontend.result == 'success') }}
-      
-      steps:
-        - name: Deploy to VM via SSH
-          uses: appleboy/ssh-action@v1.0.3
-          with:
-            host: ${{ secrets.SSH_HOST }}
-            username: opc
-            key: ${{ secrets.SSH_PRIVATE_KEY }}
-            script: |
-              echo "--- Descargando nuevas imágenes de Docker Hub ---"
-              cd ~/Veterinaria
-              
-              # 1. Ejecutar pull para traer las nuevas imágenes
-              # El '|| true' en pull es para evitar que falle si solo hubo un cambio
-              docker compose pull backend frontend || true 
-              
-              # 2. Recrear los contenedores con las imágenes recién descargadas
-              echo "--- Iniciando reconstrucción y actualización de contenedores ---"
-              # Solo recreamos los contenedores de backend y frontend (la DB no cambia)
-              docker compose up -d --force-recreate backend frontend
+    runs-on: ubuntu-latest
+    # Dependencia: Se ejecuta después de que los jobs de build terminen.
+    needs: [build_and_push_backend, build_and_push_frontend]
+    # Condición CLAVE: Se ejecuta siempre (always()), pero solo si al menos uno de los builds fue exitoso.
+    # Esto permite el despliegue aunque un job se haya saltado ('skipped') por no tener cambios.
+    if: ${{ always() && (needs.build_and_push_backend.result == 'success' || needs.build_and_push_frontend.result == 'success') }}
+    steps:
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: opc
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Navega al directorio del proyecto
+            cd ~/Veterinaria
+            
+            echo "--- Downloading latest images from Docker Hub ---"
+            # Descarga las imágenes más recientes. '|| true' evita errores si una imagen no se actualizó.
+            docker compose pull backend frontend || true
+            
+            echo "--- Recreating containers with new images ---"
+            # Recrea solo los contenedores que cambiaron, sin tocar la base de datos.
+            docker compose up -d --force-recreate backend frontend
 
-              # 3. Mostrar el estado de los logs del backend para verificación inmediata
-              echo "--- Verificando el estado del Backend ---"
-              docker compose logs --tail 20 backend
+            echo "--- Verifying backend status ---"
+            # Muestra los últimos logs para una verificación rápida.
+            docker compose logs --tail 20 backend

@@ -36,7 +36,7 @@ public class AuthController {
             usuarioService.registrarUsuario(registroDto);
             return new ResponseEntity<>("Usuario registrado exitosamente", HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            // [DEPURACIÓN]
+
             System.err.println("[ERROR EN REGISTRO] " + e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
