@@ -45,7 +45,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         try {
-            // [DEPURACIÓN]
             System.out.println("[DEPURACIÓN] Solicitud /login recibida para usuario: " + loginDto.getUsername());
 
             Authentication authentication = authenticationManager.authenticate(
