@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # -----------------------------------------------------
+  # 1. SERVICIO DE BASE DE DATOS (MYSQL)
+  # -----------------------------------------------------
+  database:
+    image: mysql:8.0
+    container_name: veterinaria_db
+    restart: always
+    environment:
+      # Variables de entorno para MySQL (leídas desde el archivo .env)
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} 
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      # Puerto para acceder con DBeaver desde fuera de Docker
+      - "3306:3306"
+    volumes:
+      # Persistencia de datos de MySQL
+      - db_data:/var/lib/mysql
+
+  # -----------------------------------------------------
+  # 2. SERVICIO DE BACKEND (SPRING BOOT)
+  # -----------------------------------------------------
+  backend:
+    # Ruta corregida: Construye a partir de la carpeta Backend/
+    build: ./Backend 
+    image: jamirg17/veterinaria-backend:latest
+    container_name: veterinaria_backend
+    restart: always
+    environment:
+      # Sobreescribe la URL de la base de datos para usar el nombre del servicio Docker 'database'
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      # Aquí se pueden añadir otras variables como jwt.secret
+    depends_on:
+      - database
+
+  # -----------------------------------------------------
+  # 3. SERVICIO DE FRONTEND (ANGULAR + NGINX)
+  # -----------------------------------------------------
+  frontend:
+    # Ruta corregida: Construye a partir de la carpeta Frontend/
+    build: ./Frontend
+    image: jamirg17/veterinaria-frontend:latest
+    container_name: veterinaria_frontend
+    restart: always
+    ports:
+      # Expone el puerto 80 del Nginx al puerto 80 del host (la VM)
+      - "80:80" 
+    depends_on:
+      - backend
+      
+volumes:
+  db_data:
