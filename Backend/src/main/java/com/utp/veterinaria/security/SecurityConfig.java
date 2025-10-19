@@ -52,7 +52,7 @@ public class SecurityConfig {
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 // Usamos la IP de tu VM (puerto 80 por Nginx) y localhost
                 registry.addMapping("/**")
-                        .allowedOrigins("http://129.148.37.166", "http://localhost:4200")
+                        .allowedOrigins("http://163.176.213.230", "http://localhost:4200")
                         .allowedMethods("*") // Incluye GET, POST, OPTIONS, etc.
                         .allowedHeaders("*") // Incluye Authorization, Content-Type, etc.
                         .allowCredentials(true); // Permitimos credenciales
