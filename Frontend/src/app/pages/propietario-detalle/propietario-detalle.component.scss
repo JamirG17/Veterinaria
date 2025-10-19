@@ -1,0 +1,117 @@
+@import '../pacientes/pacientes.component.scss';
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  background: none;
+  border: none;
+  color: #387ADF;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  &:hover { text-decoration: underline; }
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 2rem;
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    h2 { margin: 0; font-size: 1.25rem; }
+  }
+  .card-body { padding: 1.5rem; }
+}
+
+.owner-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem 2rem; 
+}
+
+// --- NUEVOS ESTILOS PARA EL SELECTOR DE RAZA ---
+.custom-select-container {
+  position: relative;
+  
+  .breed-search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .breed-options-list {
+    display: none; // Oculto por defecto
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+    max-height: 240px; // Aprox. 8 items
+    overflow-y: auto;
+
+    li {
+      padding: 0.75rem;
+      cursor: pointer;
+      &:hover { background-color: #f8f9fa; }
+    }
+  }
+
+  // Se muestra la lista al hacer focus en el input
+  .breed-search-input:focus + .breed-options-list,
+  .breed-options-list:hover {
+    display: block;
+  }
+}
+
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.radio-group, .checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+  padding-top: 1.5rem; // Alinea con los otros inputs
+}
+
+.checkbox-group {
+  label { margin-bottom: 0; }
+}
+
+.input-with-button {
+  display: flex;
+  gap: 0.5rem;
+  input { flex-grow: 1; }
+}
+
+.styled-table {
+  box-shadow: none;
+}
+.btn-success {
+  background-color: #28a745;
+  color: white;
+  &:hover { background-color: darken(#28a745, 10%); }
+}
+

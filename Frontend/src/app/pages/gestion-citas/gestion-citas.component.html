@@ -1,0 +1,154 @@
+<div class="page-container">
+  
+  <div *ngIf="successMessage" class="success-alert">
+    <i class="pi pi-check-circle"></i>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <header class="page-header">
+    <h1>Gestión de Citas</h1>
+    <button class="btn btn-primary" (click)="abrirModalNuevaCita()">
+      <i class="pi pi-plus"></i>
+      <span>Nueva Cita</span>
+    </button>
+  </header>
+
+  <!-- Controles del Calendario -->
+  <div class="calendar-controls">
+    <div class="btn-group">
+      <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate">
+        Anterior
+      </div>
+      <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate">
+        Hoy
+      </div>
+      <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate">
+        Siguiente
+      </div>
+    </div>
+    <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'es' }}</h3>
+    <div class="btn-group">
+      <div class="btn btn-primary" (click)="setView(CalendarView.Month)" [class.active]="view === CalendarView.Month">Mes</div>
+      <div class="btn btn-primary" (click)="setView(CalendarView.Week)" [class.active]="view === CalendarView.Week">Semana</div>
+      <div class="btn btn-primary" (click)="setView(CalendarView.Day)" [class.active]="view === CalendarView.Day">Día</div>
+    </div>
+  </div>
+
+  <!-- Calendario -->
+  <div [ngSwitch]="view" class="calendar-wrapper">
+    <mwl-calendar-month-view
+      *ngSwitchCase="'month'"
+      [viewDate]="viewDate"
+      [events]="events"
+      (dayClicked)="dayClicked($event.day)">
+    </mwl-calendar-month-view>
+
+    <!-- VISTA DE SEMANA CORREGIDA -->
+    <mwl-calendar-week-view
+      *ngSwitchCase="'week'"
+      [viewDate]="viewDate"
+      [events]="events"
+      [dayStartHour]="dayStartHour"
+      [dayEndHour]="dayEndHour">
+    </mwl-calendar-week-view>
+
+    <!-- VISTA DE DÍA CORREGIDA -->
+    <mwl-calendar-day-view
+      *ngSwitchCase="'day'"
+      [viewDate]="viewDate"
+      [events]="events"
+      [dayStartHour]="dayStartHour"
+      [dayEndHour]="dayEndHour">
+    </mwl-calendar-day-view>
+  </div>
+
+</div>
+
+<!-- Modal para Nueva Cita (Reestructurado) -->
+<div class="modal-backdrop" *ngIf="showModal">
+  <div class="modal-content">
+    <h2>Nueva Cita</h2>
+    <form #citaForm="ngForm" (ngSubmit)="guardarCita(citaForm)">
+        
+        <!-- Paso 1: Buscar Propietario -->
+        <div class="form-group owner-search-group">
+          <label for="owner-search">Buscar Propietario (por DNI o Nombre)</label>
+          <input 
+            type="text" 
+            id="owner-search"
+            name="owner-search"
+            [(ngModel)]="propietarioSearchTerm"
+            (input)="buscarPropietario()"
+            placeholder="Escribe para buscar..."
+            autocomplete="off">
+          <ul *ngIf="propietariosEncontrados.length > 0" class="search-results">
+            <li *ngFor="let p of propietariosEncontrados" (click)="seleccionarPropietario(p)">
+              {{ p.nombre }} {{ p.apellido }} - {{ p.dni }}
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Paso 2: Seleccionar Mascota (solo si hay propietario seleccionado) -->
+        <div class="form-group" *ngIf="propietarioSeleccionado">
+            <label for="mascota">Mascota</label>
+            <select id="mascota" name="mascota" [(ngModel)]="nuevaCita.mascotaId" required>
+                <option *ngFor="let mascota of mascotasDelPropietario" [value]="mascota.id">{{mascota.nombre}} ({{mascota.raza}})</option>
+            </select>
+        </div>
+        
+        <!-- El resto del formulario solo se muestra si hay una mascota seleccionada -->
+        <ng-container *ngIf="nuevaCita.mascotaId">
+          <div class="form-group">
+              <label for="area">Área de Servicio</label>
+              <select id="area" name="area" [(ngModel)]="nuevaCita.area" (change)="onAreaChange()" required>
+                  <option value="VETERINARIA">Veterinaria</option>
+                  <option value="GROOMING">Grooming</option>
+                  <option value="AMBOS">Ambos</option>
+              </select>
+          </div>
+          
+          <div class="form-group">
+              <label for="profesional">Asignado a ({{ nuevaCita.area === 'GROOMING' ? 'Groomer' : 'Veterinario' }})</label>
+              <select id="profesional" name="profesional" [(ngModel)]="nuevaCita.asignadoAId" required>
+                  <option *ngFor="let prof of profesionalesFiltrados" [value]="prof.id">{{prof.username}}</option>
+              </select>
+          </div>
+          
+          <div class="form-group" *ngIf="nuevaCita.area === 'AMBOS'">
+              <label for="groomer">Asignado a (Grooming)</label>
+              <select id="groomer" name="groomer" [(ngModel)]="nuevaCita.asignadoAGroomingId" required>
+                  <option *ngFor="let groomer of groomers" [value]="groomer.id">{{groomer.username}}</option>
+              </select>
+          </div>
+          
+          <div class="form-row">
+            <!-- Paso 3: Seleccionar Fecha -->
+            <div class="form-group">
+                <label for="fecha">Día de la Cita</label>
+                <input type="date" id="fecha" name="fecha" [(ngModel)]="nuevaCita.fecha" (change)="actualizarHorariosDisponibles()" required>
+            </div>
+            
+            <!-- Paso 4: Seleccionar Horario Disponible -->
+            <div class="form-group">
+                <label for="hora">Horario de Inicio</label>
+                <select id="hora" name="hora" [(ngModel)]="nuevaCita.hora" required [disabled]="horariosDisponibles.length === 0">
+                  <option *ngIf="horariosDisponibles.length === 0" disabled>Selecciona una fecha primero</option>
+                  <option *ngFor="let hora of horariosDisponibles" [value]="hora">{{hora}}</option>
+                </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+              <label for="motivo">Motivo de la Cita</label>
+              <textarea id="motivo" name="motivo" rows="3" [(ngModel)]="nuevaCita.motivo" required></textarea>
+          </div>
+        </ng-container>
+
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!citaForm.valid">Guardar Cita</button>
+        </div>
+    </form>
+  </div>
+</div>
+

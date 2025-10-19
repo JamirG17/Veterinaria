@@ -1,0 +1,195 @@
+// Estilos generales de la página
+.page-container {
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+    color: #343A40;
+  }
+}
+
+.calendar-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-wrapper {
+  height: 100%; // Altura fija para el calendario
+}
+
+// Estilos para botones (genéricos)
+.btn {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &-primary {
+    background-color: #387ADF;
+    color: white;
+    &:hover { background-color: darken(#387ADF, 10%); }
+  }
+  
+  &-secondary {
+    background-color: #6c757d;
+    color: white;
+     &:hover { background-color: darken(#6c757d, 10%); }
+  }
+
+  &-outline-secondary {
+    background-color: transparent;
+    border-color: #6c757d;
+    color: #6c757d;
+    &:hover { background-color: #6c757d; color: white; }
+  }
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+// Estilos para el Modal
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 500px;
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+  }
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+// --- ESTILOS AÑADIDOS PARA EL MENSAJE DE ÉXITO ---
+.success-alert {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #c3e6cb;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-weight: 500;
+  animation: fadeInOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+// --- NUEVOS ESTILOS PARA EL FORMULARIO MEJORADO ---
+.owner-search-group {
+  position: relative;
+  
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 2100; // Por encima del modal
+    max-height: 150px;
+    overflow-y: auto;
+    
+    li {
+      padding: 0.75rem;
+      cursor: pointer;
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 1.5rem;
+  
+  .form-group {
+    flex: 1;
+  }
+}
+
+// --- ESTILOS CORREGIDOS PARA EL MODAL ---
+.modal-backdrop {
+  // Añadimos padding para que el modal no toque los bordes en pantallas pequeñas
+  padding: 1rem; 
+}
+
+.modal-content {
+  // Añadimos una altura máxima y scroll vertical
+  max-height: 90vh;
+  overflow-y: auto;
+}

@@ -1,0 +1,74 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Sala de Espera Virtual</h1>
+    <p class="subtitle">Gestiona tus consultas del día.</p>
+  </header>
+
+  <!-- SECCIÓN: CONSULTAS EN PROGRESO -->
+  <div class="card in-progress-list" *ngIf="pacientesEnConsulta.length > 0">
+    <div class="card-header">
+      <h2><i class="pi pi-spin pi-spinner"></i> Consultas en Progreso</h2>
+    </div>
+    <div class="card-body">
+      <div *ngFor="let cita of pacientesEnConsulta" class="waiting-item">
+        <div class="pet-info">
+          <span class="pet-name">{{ cita.mascota.nombre }}</span>
+          <span class="owner-name">{{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }}</span>
+        </div>
+        <div class="reason">{{ cita.motivo }}</div>
+        <!-- LÍNEA CORREGIDA: Pasamos el objeto 'cita' completo -->
+        <button class="btn btn-success" (click)="continuarConsulta(cita)">
+          <i class="pi pi-arrow-right"></i> Continuar Consulta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de Pacientes en Espera -->
+  <div class="card waiting-list">
+    <div class="card-header">
+      <h2><i class="pi pi-clock"></i> Pacientes en Espera</h2>
+    </div>
+    <div class="card-body">
+      <div *ngIf="pacientesEnEspera.length > 0; else noEnEspera">
+        <div *ngFor="let cita of pacientesEnEspera" class="waiting-item">
+          <div class="pet-info">
+            <span class="pet-name">{{ cita.mascota.nombre }}</span>
+            <span class="owner-name">{{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }}</span>
+          </div>
+          <div class="reason">{{ cita.motivo }}</div>
+          <!-- LÍNEA CORREGIDA: Pasamos el objeto 'cita' completo -->
+          <button class="btn btn-primary" (click)="iniciarConsulta(cita)">
+            <i class="pi pi-play"></i> Iniciar Consulta
+          </button>
+        </div>
+      </div>
+      <ng-template #noEnEspera>
+        <p class="empty-message">No hay pacientes en la sala de espera en este momento.</p>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Sección de Próximas Citas -->
+  <div class="card upcoming-appointments">
+    <div class="card-header">
+      <h2><i class="pi pi-calendar"></i> Próximas Citas Programadas</h2>
+    </div>
+    <div class="card-body">
+        <ul *ngIf="proximasCitasProgramadas.length > 0; else noProgramadas">
+            <li *ngFor="let cita of proximasCitasProgramadas" class="appointment-item">
+              <div class="time">{{ cita.fechaHora | date:'HH:mm' }}</div>
+              <div class="appointment-details">
+                <span class="pet-name">{{ cita.mascota.nombre }}</span>
+                <span class="reason">{{ cita.motivo }}</span>
+              </div>
+            </li>
+          </ul>
+          <ng-template #noProgramadas>
+            <p class="empty-message">No hay más citas programadas para hoy.</p>
+          </ng-template>
+    </div>
+  </div>
+
+</div>
+

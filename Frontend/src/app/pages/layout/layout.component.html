@@ -1,0 +1,13 @@
+<div class="layout-container" [class.sidebar-expanded]="sidebarRef.isExpanded">
+  <!-- La barra lateral se coloca aquí -->
+  <app-sidebar #sidebarRef></app-sidebar>
+
+  <!-- El área de contenido principal -->
+  <main class="content-area">
+    <!-- NUEVA CLAVE: El wrapper que vamos a centrar y limitar -->
+    <div class="content-wrapper"> 
+      <!-- El router-outlet es un marcador de posición... -->
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

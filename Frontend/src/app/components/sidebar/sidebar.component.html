@@ -1,0 +1,113 @@
+<nav 
+  class="sidebar" 
+  [class.expanded]="isExpanded"
+  (mouseenter)="expand()"
+  (mouseleave)="collapse()"
+>
+  <!-- Sección del Usuario -->
+  <div class="user-profile">
+    <div class="avatar">
+      <span>{{ username.charAt(0).toUpperCase() }}</span>
+    </div>
+    <div class="user-details">
+      <h3>{{ username }}</h3>
+      <p>{{ userRole }}</p>
+    </div>
+  </div>
+
+  <!-- Lista de Navegación -->
+  <ul class="nav-list">
+    <!-- Dashboard (General para Admin/Recepcionista) -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA'])">
+      <a routerLink="/dashboard" routerLinkActive="active">
+        <i class="icon pi pi-th-large"></i>
+        <span class="nav-text">Dashboard</span>
+      </a>
+    </li>
+    <!-- Dashboard de Grooming (Solo si es Groomer y no recepcionista/admin) -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_GROOMING']) && !hasRole(['ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA'])">
+        <a routerLink="/grooming-dashboard" routerLinkActive="active">
+          <i class="icon pi pi-th-large"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+    </li>
+    <!-- Gestión de Citas -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA'])">
+      <a routerLink="/gestion-citas" routerLinkActive="active">
+        <i class="icon pi pi-calendar"></i>
+        <span class="nav-text">Gestión de Citas</span>
+      </a>
+    </li>
+    <!-- Historial de Citas -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA'])">
+      <a routerLink="/historial-citas" routerLinkActive="active">
+        <i class="icon pi pi-history"></i>
+        <span class="nav-text">Historial de Citas</span>
+      </a>
+    </li>
+    <!-- Pacientes y Propietarios -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA'])">
+        <a routerLink="/pacientes" routerLinkActive="active">
+          <i class="icon pi pi-users"></i>
+          <span class="nav-text">Pacientes y Propietarios</span>
+        </a>
+    </li>
+    <!-- Agenda de Grooming -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_GROOMING'])">
+      <a routerLink="/agenda-grooming" routerLinkActive="active">
+        <i class="icon pi pi-list-check"></i>
+        <span class="nav-text">Mi Agenda de Hoy</span>
+      </a>
+    </li>
+        <!-- NUEVO ENLACE PARA EL HISTORIAL DE GROOMING -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_GROOMING'])">
+      <a routerLink="/historial-grooming" routerLinkActive="active">
+        <i class="icon pi pi-history"></i>
+        <span class="nav-text">Historial Grooming</span>
+      </a>
+    </li>
+        <!-- Dashboard de Veterinario -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_VETERINARIO']) && !hasRole(['ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA'])">
+        <a routerLink="/veterinario-dashboard" routerLinkActive="active">
+          <i class="icon pi pi-th-large"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+    </li>
+        <!-- NUEVOS ENLACES PARA EL VETERINARIO -->
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_VETERINARIO'])">
+      <a routerLink="/historial-clinico" routerLinkActive="active">
+        <i class="icon pi pi-book"></i>
+        <span class="nav-text">Historial Clínico</span>
+      </a>
+    </li>
+    <li class="nav-item" *ngIf="hasRole(['ROL_ADMINISTRADOR', 'ROL_VETERINARIO'])">
+      <a routerLink="/lista-pacientes" routerLinkActive="active">
+        <i class="icon pi pi-list"></i>
+        <span class="nav-text">Lista de Pacientes</span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- Sección de Cerrar Sesión -->
+  <div class="logout-section">
+    <a (click)="logout()">
+      <i class="icon pi pi-sign-out"></i>
+      <span class="nav-text">Cerrar Sesión</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Modal de Confirmación para Cerrar Sesión -->
+<div class="modal-backdrop" *ngIf="showLogoutConfirmModal">
+    <div class="modal-content modal-sm">
+        <h2 class="confirm-title"><i class="pi pi-exclamation-triangle"></i>Confirmar Cierre de Sesión</h2>
+        <p class="confirm-text">
+            ¿Está seguro de que desea cerrar su sesión?
+        </p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cancelLogout()">Cancelar</button>
+            <button type="button" class="btn btn-danger" (click)="confirmLogout()">Sí, cerrar sesión</button>
+        </div>
+    </div>
+</div>
+

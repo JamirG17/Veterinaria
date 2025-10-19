@@ -1,0 +1,14 @@
+@import '../dashboard/dashboard.component.scss'; // Reutilizamos muchos estilos del dashboard de recepcionista
+
+// Estilos específicos si son necesarios
+.upcoming-appointments .appointment-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    &:last-child {
+        border-bottom: none;
+    }
+}
+

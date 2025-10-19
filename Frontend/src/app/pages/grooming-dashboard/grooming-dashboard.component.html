@@ -1,0 +1,55 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Dashboard de Grooming</h1>
+    <p class="subtitle">Resumen de tu jornada de hoy.</p>
+  </header>
+
+  <!-- Tarjetas de Estadísticas -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <i class="pi pi-calendar icon blue"></i>
+      <div class="stat-info">
+        <span class="value">{{ stats.total }}</span>
+        <span class="label">Servicios Totales Hoy</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <i class="pi pi-check-square icon green"></i>
+      <div class="stat-info">
+        <span class="value">{{ stats.completadas }}</span>
+        <span class="label">Servicios Completados</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <i class="pi pi-clock icon orange"></i>
+      <div class="stat-info">
+        <span class="value">{{ stats.pendientes }}</span>
+        <span class="label">Servicios Pendientes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Próximos Servicios -->
+  <div class="card upcoming-appointments">
+    <div class="card-header">
+      <h2>Próximos Servicios</h2>
+      <button class="btn btn-primary" (click)="irAAgenda()">Ver Agenda Completa</button>
+    </div>
+    <div class="card-body">
+      <ul *ngIf="proximasCitas.length > 0; else noCitas">
+        <li *ngFor="let cita of proximasCitas" class="appointment-item">
+          <div class="time">{{ cita.fechaHora | date:'HH:mm' }}</div>
+          <div class="appointment-details">
+            <span class="pet-name">{{ cita.mascota.nombre }}</span>
+            <span class="reason">{{ cita.motivo }}</span>
+          </div>
+          <span class="status-badge" [ngClass]="cita.estado.toLowerCase().replace(' ', '-')">{{ cita.estado }}</span>
+        </li>
+      </ul>
+      <ng-template #noCitas>
+        <p class="empty-message">No tienes más servicios programados para el resto del día.</p>
+      </ng-template>
+    </div>
+  </div>
+</div>
+

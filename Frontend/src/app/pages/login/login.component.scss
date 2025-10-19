@@ -1,0 +1,154 @@
+// Paleta de colores para Veterinaria
+$primary-color: #387ADF;
+$secondary-color: #dde9fa;  // Fondo de página gris claro como en tu ejemplo
+$text-color: #333;
+$light-text-color: #666;
+$border-color: #ddd;
+$shadow-light: rgba(0, 0, 0, 0.1);
+$shadow-medium: rgba(0, 0, 0, 0.15);
+$error-color: #dc3545;
+
+// Mixin para el botón
+@mixin button-style($bg-color, $text-color: #fff) {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: $bg-color;
+  color: $text-color;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px $shadow-light;
+  }
+}
+
+// Contenedor principal de la página
+.full-page-container {
+  display: flex;
+  flex-direction: column; // En móvil, una tarjeta encima de la otra
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  background-color: $secondary-color;
+  gap: 30px; // Espacio entre tarjetas en vista móvil
+
+  // En pantallas grandes, se ponen una al lado de la otra
+  @media (min-width: 992px) {
+    flex-direction: row;
+    gap: 50px; // EL ESPACIO DE SEPARACIÓN QUE BUSCABAS
+  }
+}
+
+// Tarjeta 1: Bienvenida (Branding)
+.login-branding {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px $shadow-light;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+
+  .branding-image {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .branding-text {
+    h1 {
+      font-size: 2.2em;
+      color: $text-color;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 1.1em;
+      color: $light-text-color;
+    }
+  }
+
+  // Ocultamos esta tarjeta en pantallas medianas para dar espacio al login
+  @media (max-width: 991px) {
+    display: none;
+  }
+}
+
+// Tarjeta 2: Formulario de Login
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px $shadow-light;
+  width: 100%;
+  max-width: 450px;
+  box-sizing: border-box;
+
+  .card-title {
+    font-size: 2.2em;
+    color: $text-color;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .card-subtitle {
+    font-size: 1em;
+    color: $light-text-color;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+}
+
+// Formulario de Login (interno a la tarjeta)
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: $text-color;
+    font-size: 0.95em;
+  }
+
+  .form-input {
+    padding: 12px 15px;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
+      outline: none;
+    }
+  }
+
+  .submit-button {
+    @include button-style($primary-color);
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .error-message {
+    color: $error-color;
+    text-align: center;
+    margin-top: 5px;
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+}

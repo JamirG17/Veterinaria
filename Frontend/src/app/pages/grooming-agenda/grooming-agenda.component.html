@@ -1,0 +1,95 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Mi Agenda de Grooming - Hoy</h1>
+    <p class="subtitle">Estos son tus servicios programados para el día.</p>
+  </header>
+
+  <div class="agenda-list">
+    <div *ngFor="let cita of citasDeHoy" class="appointment-card" (click)="verDetalle(cita)">
+      <div class="card-time">{{ cita.fechaHora | date:'HH:mm' }}</div>
+      <div class="card-pet-info">
+        <span class="pet-name">{{ cita.mascota.nombre }}</span>
+        <span class="pet-breed">{{ cita.mascota.raza }}</span>
+      </div>
+      <div class="card-service">{{ cita.motivo }}</div>
+      <div class="card-status">
+        <span class="status-badge" [ngClass]="cita.estado.toLowerCase().replace(' ', '-')">{{ cita.estado }}</span>
+      </div>
+      <div class="card-actions">
+        <button *ngIf="cita.estado === 'PROGRAMADA' || cita.estado === 'EN ESPERA'" class="btn btn-sm btn-primary" (click)="cambiarEstado(cita, 'EN PROGRESO', $event)">Iniciar</button>
+        <button *ngIf="cita.estado === 'EN PROGRESO'" class="btn btn-sm btn-success" (click)="cambiarEstado(cita, 'COMPLETADA', $event)">Finalizar</button>
+      </div>
+    </div>
+    <div *ngIf="citasDeHoy.length === 0" class="empty-message">
+      <i class="pi pi-calendar-times"></i>
+      <p>No tienes citas de grooming programadas para hoy.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Detalle y Notas de Grooming -->
+<div class="modal-backdrop" *ngIf="showDetailModal && citaSeleccionada">
+  <div class="modal-content">
+    <div class="detail-header">
+      <h2>Servicio para {{ citaSeleccionada.mascota.nombre }}</h2>
+      <button class="btn-icon btn-close" (click)="cerrarModal()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="detail-body">
+      <!-- DETALLES DE LA MASCOTA CORREGIDOS -->
+      <!-- DETALLES DE LA MASCOTA -->
+      <div class="detail-section">
+        <h3>Detalles de la Mascota</h3>
+        <div class="detail-grid">
+          <div class="detail-item"><span>Raza:</span> {{ citaSeleccionada.mascota.raza }}</div>
+          <!-- Esta línea ahora funcionará correctamente -->
+          <div class="detail-item"><span>Sexo:</span> {{ citaSeleccionada.mascota.sexo }}</div>
+          <div class="detail-item"><span>Esterilizado/a:</span> {{ citaSeleccionada.mascota.esterilizado ? 'Sí' : 'No' }}</div>
+        </div>
+      </div>
+
+      <!-- Sección para añadir notas -->
+      <div class="detail-section">
+        <h3>Notas del Servicio Actual</h3>
+        <textarea rows="4" placeholder="Añade aquí tus observaciones sobre el servicio..." [(ngModel)]="notasNuevas"></textarea>
+      </div>
+
+      <!-- Sección del historial -->
+      <div class="detail-section">
+        <h3>Historial de Grooming</h3>
+        <div class="history-list">
+          <div *ngFor="let item of historialGrooming" class="history-item">
+            <span class="history-date">{{ item.fechaHora | date:'dd/MM/yyyy' }}</span>
+            <p class="history-notes">{{ item.notasGrooming || 'Sin notas.' }}</p>
+          </div>
+          <div *ngIf="historialGrooming.length === 0" class="empty-history">
+            Esta es la primera visita de grooming registrada.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+      <button type="button" class="btn btn-primary" (click)="guardarNotas()">Guardar Notas</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARA FINALIZAR SERVICIO -->
+<div class="modal-backdrop" *ngIf="showFinishModal && citaSeleccionada">
+    <div class="modal-content modal-sm">
+      <h2 class="confirm-title"><i class="pi pi-check-circle"></i>Finalizar Servicio</h2>
+      <p class="confirm-text">
+        Añade cualquier observación o problema que hayas encontrado durante el servicio.
+      </p>
+      <div class="form-group">
+        <label>Notas Adicionales</label>
+        <textarea rows="4" placeholder="Ej: Se comportó bien, se encontró irritación, etc." [(ngModel)]="notasNuevas"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Volver</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarFinalizacion(true)">Marcar como Cancelado</button>
+        <button type="button" class="btn btn-success" (click)="confirmarFinalizacion(false)">Finalizar Servicio</button>
+      </div>
+    </div>
+</div>
+

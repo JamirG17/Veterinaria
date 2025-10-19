@@ -1,0 +1,83 @@
+<div class="page-container">
+  
+  <div *ngIf="successMessage" class="success-alert">
+    <i class="pi pi-check-circle"></i>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <header class="page-header">
+    <h1>Pacientes y Propietarios</h1>
+    <button class="btn btn-primary" (click)="abrirModalPropietario()">
+      <i class="pi pi-plus"></i>
+      <span>Nuevo Propietario</span>
+    </button>
+  </header>
+
+  <div class="search-bar">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Buscar por nombre, apellido, email o DNI..." 
+           [(ngModel)]="searchTerm" (input)="filtrarPropietarios()">
+  </div>
+
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Nombre Completo</th>
+          <th>DNI</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Mascotas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let propietario of propietariosFiltrados" (click)="verDetalle(propietario.id)" class="clickable-row">
+          <td>{{ propietario.nombre }} {{ propietario.apellido }}</td>
+          <td>{{ propietario.dni }}</td>
+          <td>{{ propietario.email }}</td>
+          <td>{{ propietario.telefono }}</td>
+          <td>{{ propietario.mascotas.length || 0 }}</td>
+        </tr>
+        <tr *ngIf="propietariosFiltrados.length === 0">
+          <td colspan="5" class="text-center">No se encontraron propietarios.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal para NUEVO Propietario -->
+<div class="modal-backdrop" *ngIf="showOwnerModal">
+  <div class="modal-content">
+    <!-- El formulario ahora siempre estará presente cuando el modal esté visible -->
+    <form #ownerForm="ngForm" (ngSubmit)="guardarPropietario(ownerForm)">
+      <h2>Nuevo Propietario</h2>
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" name="nombre" [(ngModel)]="nuevoPropietario.nombre" required>
+      </div>
+      <div class="form-group">
+        <label>Apellido</label>
+        <input type="text" name="apellido" [(ngModel)]="nuevoPropietario.apellido" required>
+      </div>
+      <div class="form-group">
+        <label>DNI</label>
+        <input type="text" name="dni" [(ngModel)]="nuevoPropietario.dni" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" [(ngModel)]="nuevoPropietario.email" required>
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" name="telefono" [(ngModel)]="nuevoPropietario.telefono" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!ownerForm.valid">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+

@@ -1,0 +1,147 @@
+@import '../gestion-citas/gestion-citas.component.scss';
+
+// Estilos para la tarjeta de resumen
+.summary-card {
+  margin-bottom: 2rem;
+}
+.summary-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  h1 { margin: 0 0 0.5rem 0; font-size: 2rem; color: #343A40; }
+}
+.pet-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  .tag {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+.summary-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  span:first-child {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+// Estilos para las pestañas
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: -1px; // Para que el borde se fusione con la tarjeta
+}
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #dee2e6;
+  border-bottom: none;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem 0.5rem 0 0;
+  cursor: pointer;
+  font-weight: 600;
+  color: #495057;
+  &.active {
+    background-color: #fff;
+    border-color: #dee2e6;
+    border-bottom: 1px solid #fff;
+    color: #387ADF;
+  }
+}
+.tab-content {
+  border-top-left-radius: 0;
+}
+
+// Estilos para las listas de historial (reutilizados)
+.history-list {
+  padding: 1.5rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+// --- NUEVOS ESTILOS PARA LA TARJETA DE SALUD ---
+.health-card {
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  .health-section {
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      margin-top: 0;
+      color: #343A40;
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      resize: vertical;
+    }
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .allergies {
+    h3 { color: #d9534f; }
+    textarea {
+      border-color: #fadadd;
+      &[readonly] {
+        background-color: #f8f9fa;
+        border-color: #e9ecef;
+        cursor: default;
+      }
+      &:focus {
+        border-color: #d9534f;
+        box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.2);
+      }
+    }
+  }
+}
+
+.prevention-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    
+    &:nth-child(odd) {
+      background-color: #f8f9fa;
+    }
+  }
+  .empty-item {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+  }
+  .btn-delete {
+    color: #dc3545;
+  }
+}
+

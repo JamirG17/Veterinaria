@@ -1,0 +1,100 @@
+@import '../gestion-citas/gestion-citas.component.scss';
+
+.subtitle {
+  color: #6c757d;
+  margin-top: -1.5rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #343A40;
+  }
+  i {
+    font-size: 1.25rem;
+  }
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+// --- ESTILOS NUEVOS PARA LA SECCIÓN "EN PROGRESO" ---
+.in-progress-list {
+  border: 1px solid #b7e4c7; // Borde verde suave
+  .card-header i {
+    color: #2d6a4f; // Icono verde oscuro
+  }
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+  }
+}
+
+// --- ESTILOS AJUSTADOS PARA LA SALA DE ESPERA ---
+.waiting-list {
+  .card-header i {
+    color: #f79009; // Icono naranja
+  }
+}
+
+.waiting-item {
+  display: grid;
+  grid-template-columns: 2fr 3fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+  &:last-child { border-bottom: none; }
+}
+
+.pet-info {
+  display: flex;
+  flex-direction: column;
+  .pet-name { font-weight: 600; font-size: 1.1rem; }
+  .owner-name { font-size: 0.9rem; color: #6c757d; }
+}
+
+.reason {
+  color: #495057;
+}
+
+// Estilos para la lista de próximas citas
+.upcoming-appointments {
+    .card-header i {
+        color: #387ADF; // Icono azul
+    }
+    ul { list-style: none; padding: 0; margin: 0; }
+    .appointment-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e9ecef;
+        &:last-child { border-bottom: none; }
+    }
+    .time { font-weight: 600; font-size: 1.1rem; color: #387ADF; width: 80px; }
+    .appointment-details {
+        .pet-name { font-weight: 600; }
+        .reason { font-size: 0.9rem; color: #6c757d; }
+    }
+}
+
+.empty-message {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+

@@ -1,0 +1,37 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Historial Clínico General</h1>
+  </header>
+
+  <div class="search-bar">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Buscar por mascota, propietario o diagnóstico..." 
+           [(ngModel)]="filtroTexto" (input)="aplicarFiltros()">
+  </div>
+
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Paciente</th>
+          <th>Propietario</th>
+          <th>Diagnóstico Principal</th>
+          <th>Veterinario</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let registro of registrosFiltrados">
+          <td>{{ registro.fecha | date:'dd/MM/yyyy' }}</td>
+          <td>{{ registro.mascota.nombre }}</td>
+          <td>{{ registro.mascota.propietario?.nombre }} {{ registro.mascota.propietario?.apellido }}</td>
+          <td>{{ registro.diagnostico }}</td>
+          <td>{{ registro.veterinario.username }}</td>
+        </tr>
+        <tr *ngIf="registrosFiltrados.length === 0">
+          <td colspan="5" class="text-center">No se encontraron registros.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

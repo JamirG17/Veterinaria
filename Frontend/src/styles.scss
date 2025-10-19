@@ -1,0 +1,8 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  // CRÍTICO: Asegura que el contenedor principal no genere scroll horizontal
+  overflow-x: hidden; 
+}

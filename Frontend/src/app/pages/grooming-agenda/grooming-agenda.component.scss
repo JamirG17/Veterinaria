@@ -1,0 +1,138 @@
+@import '../gestion-citas/gestion-citas.component.scss';
+
+$danger-soft-color: #e57373;
+
+.subtitle {
+  color: #6c757d;
+  margin-top: -1.5rem;
+}
+
+.agenda-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.appointment-card {
+  display: grid;
+  grid-template-columns: 80px 2fr 3fr 1fr 1.5fr;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+}
+
+.card-time { font-size: 1.5rem; font-weight: 700; color: #387ADF; }
+.card-pet-info {
+  display: flex;
+  flex-direction: column;
+  .pet-name { font-weight: 600; font-size: 1.1rem; }
+  .pet-breed { font-size: 0.9rem; color: #6c757d; }
+}
+.card-service { color: #495057; }
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  .btn-success {
+    background-color: $danger-soft-color;
+    &:hover {
+      background-color: darken($danger-soft-color, 10%);
+    }
+  }
+}
+
+// --- ESTILOS CORREGIDOS PARA EL MODAL DE DETALLE ---
+.modal-content {
+  position: relative; 
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  
+  h2 { margin: 0; font-size: 1.5rem; }
+
+  .btn-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    color: #6c757d;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 1;
+    &:hover { color: #343A40; }
+  }
+}
+
+.detail-body {
+  padding-bottom: 1rem;
+}
+.detail-section {
+  margin-bottom: 2rem;
+  &:last-child { margin-bottom: 0; }
+  h3 {
+    font-size: 1.1rem;
+    color: #387ADF;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  span:first-child {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+// Estilos para el historial
+.history-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+.history-item {
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+  &:last-child { border-bottom: none; margin-bottom: 0; }
+  .history-date { font-weight: 600; font-size: 0.9rem; color: #343A40; }
+  .history-notes { font-size: 0.9rem; color: #6c757d; margin: 0.25rem 0 0 0; white-space: pre-wrap; }
+}
+.empty-history { text-align: center; color: #6c757d; font-style: italic; }
+
+// Estilos para el modal de finalización
+.modal-actions .btn-success {
+  background-color: $danger-soft-color;
+  &:hover {
+    background-color: darken($danger-soft-color, 10%);
+  }
+}
+

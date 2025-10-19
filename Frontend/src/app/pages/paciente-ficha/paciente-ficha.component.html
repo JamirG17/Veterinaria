@@ -1,0 +1,169 @@
+<div class="page-container" *ngIf="detalle">
+  <button class="btn btn-back" (click)="regresar()">
+    <i class="pi pi-arrow-left"></i>
+    <span>Regresar</span>
+  </button>
+
+  <!-- Tarjeta de Resumen del Paciente -->
+  <div class="card summary-card">
+    <div class="summary-header">
+      <h1>{{ detalle.mascota.nombre }}</h1>
+      <div class="pet-tags">
+        <span class="tag">{{ detalle.mascota.raza }}</span>
+        <span class="tag">{{ detalle.mascota.sexo }}</span>
+        <span class="tag">{{ detalle.mascota.esterilizado ? 'Esterilizado/a' : 'No Esterilizado/a' }}</span>
+      </div>
+    </div>
+    <div class="summary-body">
+      <div class="detail-item"><span>Edad</span> {{ calcularEdad(detalle.mascota.fechaNacimiento) }}</div>
+      <div class="detail-item"><span>Peso</span> {{ detalle.mascota.peso }} kg</div>
+      <div class="detail-item"><span>Propietario</span> {{ detalle.propietario.nombre }} {{ detalle.propietario.apellido }}</div>
+      <div class="detail-item"><span>Teléfono</span> {{ detalle.propietario.telefono }}</div>
+    </div>
+  </div>
+
+  <!-- Tarjeta de Salud Preventiva y Alertas -->
+  <div class="card health-card">
+    <div class="card-header">
+      <h2><i class="pi pi-shield"></i> Salud Preventiva y Alertas</h2>
+    </div>
+    <div class="card-body health-grid">
+      <!-- Sección de Alergias -->
+      <div class="health-section allergies">
+        <div class="section-header">
+          <h3><i class="pi pi-exclamation-triangle"></i> Alergias y Condiciones</h3>
+          <button *ngIf="!isEditingAlergias" class="btn btn-sm btn-outline" (click)="activarEdicionAlergias()">Editar</button>
+        </div>
+        <textarea rows="4" placeholder="Sin alergias o condiciones registradas." 
+                  [readonly]="!isEditingAlergias"
+                  [(ngModel)]="detalle.mascota.alergias"></textarea>
+        <div *ngIf="isEditingAlergias" class="edit-actions">
+          <button class="btn btn-sm btn-secondary" (click)="cancelarEdicionAlergias()">Cancelar</button>
+          <button class="btn btn-sm btn-primary" (click)="guardarAlergias()">Guardar</button>
+        </div>
+      </div>
+      <!-- Sección de Vacunación -->
+      <div class="health-section">
+        <div class="section-header">
+          <h3><i class="pi pi-syringe"></i> Vacunación</h3>
+          <button class="btn btn-sm btn-primary" (click)="abrirModalPrevencion('VACUNA')">Añadir</button>
+        </div>
+        <ul class="prevention-list">
+          <li *ngFor="let v of vacunas">
+            <span><strong>{{ v.producto }}</strong> ({{ v.fechaAplicacion | date:'dd/MM/yy' }})</span>
+            <button class="btn-icon btn-delete" (click)="eliminarPrevencion(v.id)" title="Eliminar registro"><i class="pi pi-trash"></i></button>
+          </li>
+          <li *ngIf="vacunas.length === 0" class="empty-item">No hay vacunas registradas.</li>
+        </ul>
+      </div>
+      <!-- Sección de Desparasitación -->
+      <div class="health-section">
+        <div class="section-header">
+          <h3><i class="pi pi-shield-check"></i> Desparasitación</h3>
+          <button class="btn btn-sm btn-primary" (click)="abrirModalPrevencion('DESPARASITACION')">Añadir</button>
+        </div>
+         <ul class="prevention-list">
+          <li *ngFor="let d of desparasitaciones">
+            <span><strong>{{ d.producto }}</strong> ({{ d.fechaAplicacion | date:'dd/MM/yy' }})</span>
+            <button class="btn-icon btn-delete" (click)="eliminarPrevencion(d.id)" title="Eliminar registro"><i class="pi pi-trash"></i></button>
+          </li>
+          <li *ngIf="desparasitaciones.length === 0" class="empty-item">No hay registros.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pestañas de Historial -->
+  <div class="tabs">
+    <button class="tab-button" [class.active]="activeTab === 'clinico'" (click)="activeTab = 'clinico'">
+      Historial Clínico ({{ detalle.historialClinico.length }})
+    </button>
+    <button class="tab-button" [class.active]="activeTab === 'grooming'" (click)="activeTab = 'grooming'">
+      Historial Grooming ({{ detalle.historialGrooming.length }})
+    </button>
+    <button class="tab-button" [class.active]="activeTab === 'citas'" (click)="activeTab = 'citas'">
+      Próximas Citas ({{ detalle.proximasCitas.length }})
+    </button>
+  </div>
+
+  <!-- Contenido de las Pestañas -->
+  <div class="card tab-content">
+    <div [ngSwitch]="activeTab">
+      <!-- Historial Clínico -->
+      <div *ngSwitchCase="'clinico'" class="history-list">
+        <div *ngIf="detalle.historialClinico.length > 0; else noClinico">
+          <div *ngFor="let registro of detalle.historialClinico" class="history-item">
+            <span class="history-date">{{ registro.fecha | date:'dd/MM/yyyy' }}</span>
+            <div class="history-details">
+              <p><strong>Síntomas/Obs:</strong> {{ registro.sintomas }}</p>
+              <p><strong>Diagnóstico:</strong> {{ registro.diagnostico }}</p>
+              <p><strong>Tratamiento:</strong> {{ registro.tratamiento }}</p>
+            </div>
+          </div>
+        </div>
+        <ng-template #noClinico>
+          <p class="empty-message">No hay registros clínicos anteriores.</p>
+        </ng-template>
+      </div>
+
+      <!-- Historial Grooming -->
+      <div *ngSwitchCase="'grooming'" class="history-list">
+        <div *ngIf="detalle.historialGrooming.length > 0; else noGrooming">
+            <div *ngFor="let cita of detalle.historialGrooming" class="history-item">
+              <span class="history-date">{{ cita.fechaHora | date:'dd/MM/yyyy' }}</span>
+              <div class="history-details">
+                <p><strong>Servicio:</strong> {{ cita.motivo }}</p>
+                <p><strong>Notas:</strong> {{ cita.notasGrooming || 'Sin notas.' }}</p>
+              </div>
+            </div>
+        </div>
+        <ng-template #noGrooming>
+          <p class="empty-message">No hay registros de grooming anteriores.</p>
+        </ng-template>
+      </div>
+
+      <!-- Próximas Citas -->
+      <div *ngSwitchCase="'citas'" class="history-list">
+        <div *ngIf="detalle.proximasCitas.length > 0; else noProximas">
+          <div *ngFor="let cita of detalle.proximasCitas" class="history-item">
+            <span class="history-date">{{ cita.fechaHora | date:'full':'':'es' }}</span>
+            <div class="history-details">
+              <p><strong>Área:</strong> {{ cita.area }}</p>
+              <p><strong>Motivo:</strong> {{ cita.motivo }}</p>
+              <p><strong>Asignado a:</strong> {{ cita.asignadoA.username }}</p>
+            </div>
+          </div>
+        </div>
+         <ng-template #noProximas>
+          <p class="empty-message">No hay citas programadas en el futuro.</p>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARA AÑADIR PREVENCIÓN -->
+<div class="modal-backdrop" *ngIf="showPrevencionModal">
+  <div class="modal-content modal-sm">
+    <h2>Añadir Registro de {{ nuevaPrevencion.tipo === 'VACUNA' ? 'Vacunación' : 'Desparasitación' }}</h2>
+    <form #prevencionForm="ngForm" (ngSubmit)="guardarPrevencion(prevencionForm)">
+      <div class="form-group">
+        <label>Producto / Nombre</label>
+        <input type="text" name="producto" [(ngModel)]="nuevaPrevencion.producto" required>
+      </div>
+      <div class="form-group">
+        <label>Fecha de Aplicación</label>
+        <input type="date" name="fechaAplicacion" [(ngModel)]="nuevaPrevencion.fechaAplicacion" required>
+      </div>
+      <div class="form-group">
+        <label>Próxima Dosis (Opcional)</label>
+        <input type="date" name="proximaFecha" [(ngModel)]="nuevaPrevencion.proximaFecha">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalPrevencion()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!prevencionForm.valid">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+

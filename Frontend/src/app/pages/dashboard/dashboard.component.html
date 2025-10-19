@@ -1,0 +1,146 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Dashboard del Recepcionista</h1>
+    <p class="subtitle">Resumen de la actividad de hoy</p>
+  </header>
+
+  <!-- Tarjetas de Estadísticas -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <i class="pi pi-calendar-plus icon blue"></i>
+      <div class="stat-info">
+        <span class="value">{{ stats.totalHoy }}</span>
+        <span class="label">Citas para Hoy</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <i class="pi pi-clock icon orange"></i>
+      <div class="stat-info">
+        <span class="value">{{ stats.enEspera }}</span>
+        <span class="label">Pacientes en Espera</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <i class="pi pi-check-square icon green"></i>
+      <div class="stat-info">
+        <span class="value">{{ stats.completadas }}</span>
+        <span class="label">Citas Completadas</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal (Próximas Citas y Accesos Rápidos) -->
+  <div class="main-content">
+    
+    <!-- Sección de Próximas Citas -->
+    <div class="card upcoming-appointments">
+      <div class="card-header">
+        <h2>Próximas Citas</h2>
+      </div>
+      <div class="card-body">
+        <ul *ngIf="proximasCitas.length > 0; else noCitas">
+          <!-- CAMBIO: Ahora toda la fila es clicable -->
+          <li *ngFor="let cita of proximasCitas" class="appointment-item" (click)="verDetalle(cita)">
+            <div class="time">{{ cita.fechaHora | date:'HH:mm' }}</div>
+            <div class="appointment-details">
+              <span class="pet-name">{{ cita.mascota.nombre }} <span class="owner-name"> ({{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }})</span></span>
+              <span class="reason">{{ cita.motivo }}</span>
+              <span class="vet">Asignado a: {{ cita.asignadoA.username }}</span>
+            </div>
+            <div class="actions">
+              <!-- CAMBIO: Botón "Completar" eliminado y "En Espera" ahora funciona -->
+              <button class="btn btn-sm btn-outline" (click)="marcarComoEnEspera(cita.id, $event)">En Espera</button>
+            </div>
+          </li>
+        </ul>
+        <ng-template #noCitas>
+          <p class="empty-message">No hay más citas programadas para hoy.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Sección de Accesos Rápidos -->
+    <div class="quick-actions">
+      <div class="card">
+        <div class="card-header">
+          <h2>Accesos Rápidos</h2>
+        </div>
+        <div class="card-body">
+          <button class="action-button" (click)="navegarA('/gestion-citas')">
+            <i class="pi pi-calendar"></i>
+            <span>Ver Calendario Completo</span>
+          </button>
+          <button class="action-button" (click)="navegarA('/pacientes')">
+            <i class="pi pi-users"></i>
+            <span>Gestionar Pacientes</span>
+          </button>
+          <!-- Estos botones necesitarán su lógica de modal en el futuro -->
+          <button class="action-button" (click)="navegarA('/gestion-citas')">
+            <i class="pi pi-plus-circle"></i>
+            <span>Registrar Nueva Cita</span>
+          </button>
+        </div>
+      </div>
+    </div>
+          <!-- NUEVA SECCIÓN: Mascotas Listas para Recoger -->
+      <div class="card ready-for-pickup">
+        <div class="card-header">
+          <h2>Listas para Recoger</h2>
+        </div>
+        <div class="card-body">
+          <ul *ngIf="mascotasParaRecoger.length > 0; else noListos">
+            <li *ngFor="let cita of mascotasParaRecoger" class="pickup-item">
+              <div class="pet-info">
+                <span class="pet-name">{{ cita.mascota.nombre }}</span>
+                <span class="owner-contact">
+                  {{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }} - {{ cita.mascota.propietario?.telefono }}
+                </span>
+              </div>
+              <button class="btn btn-sm btn-outline">Notificado</button>
+            </li>
+          </ul>
+          <ng-template #noListos>
+            <p class="empty-message">No hay mascotas listas para recoger.</p>
+          </ng-template>
+        </div>
+      </div>
+
+  </div>
+
+</div>
+
+<!-- NUEVO MODAL PARA VER DETALLE DE CITA -->
+<div class="modal-backdrop" *ngIf="showDetailModal && citaDetalle">
+  <div class="modal-content">
+    <div class="detail-header">
+      <h2>Detalle de la Cita</h2>
+      <button class="btn-icon btn-close" (click)="cerrarModal()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h3>Información del Paciente</h3>
+        <div class="detail-grid">
+          <div class="detail-item"><span>Mascota:</span> {{ citaDetalle.mascota.nombre }}</div>
+          <div class="detail-item"><span>Raza:</span> {{ citaDetalle.mascota.raza }}</div>
+          <div class="detail-item"><span>Propietario:</span> {{ citaDetalle.mascota.propietario?.nombre }} {{ citaDetalle.mascota.propietario?.apellido }}</div>
+          <div class="detail-item"><span>DNI:</span> {{ citaDetalle.mascota.propietario?.dni }}</div>
+          <div class="detail-item"><span>Teléfono:</span> {{ citaDetalle.mascota.propietario?.telefono }}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h3>Información de la Cita</h3>
+        <div class="detail-grid">
+          <div class="detail-item"><span>Fecha y Hora:</span> {{ citaDetalle.fechaHora | date:'full':'':'es' }}</div>
+          <div class="detail-item"><span>Área:</span> {{ citaDetalle.area }}</div>
+          <div class="detail-item"><span>Asignado a:</span> {{ citaDetalle.asignadoA.username }}</div>
+          <div class="detail-item"><span>Estado:</span> <span class="status-badge" [ngClass]="citaDetalle.estado.toLowerCase().replace(' ', '-')">{{ citaDetalle.estado }}</span></div>
+          <div class="detail-item detail-full-width"><span>Motivo:</span> {{ citaDetalle.motivo }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+

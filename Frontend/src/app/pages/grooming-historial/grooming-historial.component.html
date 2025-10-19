@@ -1,0 +1,58 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Historial de Servicios de Grooming</h1>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <div class="filter-group text-filter">
+      <label>Buscar Propietario</label>
+      <input type="text" placeholder="DNI, Nombre o Apellido..." [(ngModel)]="filtroTexto" (input)="aplicarFiltros()">
+    </div>
+    <div class="filter-group date-filter">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="filtroFechaDesde" (change)="aplicarFiltros()">
+    </div>
+    <div class="filter-group date-filter">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="filtroFechaHasta" (change)="aplicarFiltros()">
+    </div>
+    <div class="filter-group actions-filter">
+      <button class="btn btn-secondary" (click)="limpiarFiltros()">Limpiar Filtros</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="btn" [class.active]="filtroEstado === 'TODAS'" (click)="filtroEstado = 'TODAS'; aplicarFiltros()">Todos</button>
+    <button class="btn" [class.active]="filtroEstado === 'COMPLETADA'" (click)="filtroEstado = 'COMPLETADA'; aplicarFiltros()">Completados</button>
+    <button class="btn" [class.active]="filtroEstado === 'CANCELADA'" (click)="filtroEstado = 'CANCELADA'; aplicarFiltros()">Cancelados</button>
+    <button class="btn" [class.active]="filtroEstado === 'EN PROGRESO'" (click)="filtroEstado = 'EN PROGRESO'; aplicarFiltros()">En Progreso</button>
+  </div>
+
+  <!-- Tabla de Citas de Grooming -->
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Fecha y Hora</th>
+          <th>Mascota</th>
+          <th>Propietario</th>
+          <th>Servicio</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cita of citasFiltradas">
+          <td>{{ cita.fechaHora | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ cita.mascota.nombre }}</td>
+          <td>{{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }}</td>
+          <td>{{ cita.motivo }}</td>
+          <td><span class="status-badge" [ngClass]="cita.estado.toLowerCase().replace(' ', '-')">{{ cita.estado }}</span></td>
+        </tr>
+        <tr *ngIf="citasFiltradas.length === 0">
+          <td colspan="5" class="text-center">No se encontraron servicios con los filtros seleccionados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

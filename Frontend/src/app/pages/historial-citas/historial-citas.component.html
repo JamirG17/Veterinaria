@@ -1,0 +1,154 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Historial de Citas</h1>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <div class="filter-group text-filter">
+      <label>Buscar Propietario</label>
+      <input type="text" placeholder="Nombre, Apellido o DNI..." [(ngModel)]="filtroTexto" (input)="aplicarFiltros()">
+    </div>
+    <div class="filter-group date-filter">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="filtroFechaDesde" (change)="aplicarFiltros()">
+    </div>
+    <div class="filter-group date-filter">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="filtroFechaHasta" (change)="aplicarFiltros()">
+    </div>
+    <div class="filter-group actions-filter">
+      <button class="btn btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="btn" [class.active]="filtroEstado === 'TODAS'" (click)="filtroEstado = 'TODAS'; aplicarFiltros()">Todas</button>
+    <button class="btn" [class.active]="filtroEstado === 'PROGRAMADA'" (click)="filtroEstado = 'PROGRAMADA'; aplicarFiltros()">Programadas</button>
+    <button class="btn" [class.active]="filtroEstado === 'EN ESPERA'" (click)="filtroEstado = 'EN ESPERA'; aplicarFiltros()">En Espera</button>
+    <button class="btn" [class.active]="filtroEstado === 'COMPLETADA'" (click)="filtroEstado = 'COMPLETADA'; aplicarFiltros()">Completadas</button>
+    <button class="btn" [class.active]="filtroEstado === 'CANCELADA'" (click)="filtroEstado = 'CANCELADA'; aplicarFiltros()">Canceladas</button>
+  </div>
+
+  <!-- Tabla de Citas -->
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Fecha y Hora</th>
+          <th>Mascota</th>
+          <th>Propietario</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cita of citasFiltradas">
+          <td>{{ cita.fechaHora | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ cita.mascota.nombre }}</td>
+          <td>{{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }}</td>
+          <td><span class="status-badge" [ngClass]="cita.estado.toLowerCase().replace(' ', '-')">{{ cita.estado }}</span></td>
+          <td class="actions">
+            <button class="btn-icon btn-view" (click)="verDetalle(cita)" title="Ver Detalle">
+              <i class="pi pi-eye"></i>
+            </button>
+            <button class="btn-icon btn-edit" (click)="abrirModalEdicion(cita)" title="Editar">
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button class="btn-icon btn-cancel" *ngIf="cita.estado !== 'COMPLETADA' && cita.estado !== 'CANCELADA'" (click)="abrirModalCancelacion(cita)" title="Cancelar Cita">
+              <i class="pi pi-times"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="citasFiltradas.length === 0">
+          <td colspan="5" class="text-center">No se encontraron citas con los filtros seleccionados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal para VER DETALLE -->
+<div class="modal-backdrop" *ngIf="showDetailModal && citaDetalle">
+  <div class="modal-content">
+    <div class="detail-header">
+      <h2>Detalle de la Cita</h2>
+      <button class="btn-icon btn-close" (click)="cerrarModales()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h3>Información del Paciente</h3>
+        <div class="detail-grid">
+          <div class="detail-item"><span>Mascota:</span> {{ citaDetalle.mascota.nombre }}</div>
+          <div class="detail-item"><span>Raza:</span> {{ citaDetalle.mascota.raza }}</div>
+          <div class="detail-item"><span>Propietario:</span> {{ citaDetalle.mascota.propietario?.nombre }} {{ citaDetalle.mascota.propietario?.apellido }}</div>
+          <div class="detail-item"><span>DNI:</span> {{ citaDetalle.mascota.propietario?.dni }}</div>
+          <div class="detail-item"><span>Teléfono:</span> {{ citaDetalle.mascota.propietario?.telefono }}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h3>Información de la Cita</h3>
+        <div class="detail-grid">
+          <div class="detail-item"><span>Fecha y Hora:</span> {{ citaDetalle.fechaHora | date:'full':'':'es' }}</div>
+          <div class="detail-item"><span>Área:</span> {{ citaDetalle.area }}</div>
+          <div class="detail-item"><span>Asignado a:</span> {{ citaDetalle.asignadoA.username }}</div>
+          <div class="detail-item"><span>Estado:</span> <span class="status-badge" [ngClass]="citaDetalle.estado.toLowerCase().replace(' ', '-')">{{ citaDetalle.estado }}</span></div>
+          <div class="detail-item detail-full-width"><span>Motivo:</span> {{ citaDetalle.motivo }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModales()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para EDITAR Cita -->
+<div class="modal-backdrop" *ngIf="showEditModal && citaParaEdicion">
+  <div class="modal-content">
+    <h2>Editar Cita</h2>
+    <form #editForm="ngForm" (ngSubmit)="guardarCambios(editForm)">
+      <div class="form-group">
+        <label>Mascota</label>
+        <select name="mascota" [(ngModel)]="citaParaEdicion.mascota.id" required>
+          <option *ngFor="let m of mascotas" [value]="m.id">{{m.nombre}}</option>
+        </select>
+      </div>
+       <div class="form-group">
+        <label>Asignado a</label>
+        <select name="asignadoA" [(ngModel)]="citaParaEdicion.asignadoA.id" required>
+          <option *ngFor="let p of profesionales" [value]="p.id">{{p.username}}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha y Hora</label>
+        <input type="datetime-local" name="fechaHora" [(ngModel)]="citaParaEdicion.fechaHora" required>
+      </div>
+      <div class="form-group">
+        <label>Motivo</label>
+        <textarea name="motivo" rows="3" [(ngModel)]="citaParaEdicion.motivo" required></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModales()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!editForm.valid">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal para CONFIRMAR CANCELACIÓN -->
+<div class="modal-backdrop" *ngIf="showCancelModal && citaParaCancelar">
+  <div class="modal-content modal-sm">
+    <h2 class="confirm-title"><i class="pi pi-exclamation-triangle"></i>Confirmar Cancelación</h2>
+    <p class="confirm-text">
+      ¿Está seguro de que desea cancelar la cita de <strong>{{ citaParaCancelar.mascota.nombre }}</strong> 
+      para el <strong>{{ citaParaCancelar.fechaHora | date:'dd/MM/yyyy \'a las\' HH:mm' }}</strong>?
+      <br>Esta acción no se puede deshacer.
+    </p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="cerrarModales()">No, mantener</button>
+      <button type="button" class="btn btn-danger" (click)="confirmarCancelacion()">Sí, cancelar cita</button>
+    </div>
+  </div>
+</div>
+
