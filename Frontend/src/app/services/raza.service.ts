@@ -12,7 +12,7 @@ export interface Raza {
   providedIn: 'root'
 })
 export class RazaService {
-  private apiUrl = `${environment.apiUrl}/api/razas`;
+  private apiUrl = `${environment.apiUrl}/razas`;
 
   constructor(private http: HttpClient) { }
 
