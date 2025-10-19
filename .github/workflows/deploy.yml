@@ -129,6 +129,13 @@ jobs:
             # Navega al directorio del proyecto
             cd ~/Veterinaria
             
+            echo "--- Creating .env file from GitHub Secrets ---"
+            # 1. TOMA LOS SECRETS DE GITHUB Y LOS ESCRIBE EN UN ARCHIVO .env EN EL SERVIDOR
+            echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" > .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+
             echo "--- Downloading latest images from Docker Hub ---"
             # Descarga las imágenes más recientes. '|| true' evita errores si una imagen no se actualizó.
             docker compose pull backend frontend || true

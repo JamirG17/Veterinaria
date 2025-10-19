@@ -22,9 +22,6 @@ export class AuthService {
     return this.http.post(registroUrl, usuario);
   }
   
-  // ===============================================
-  // MÉTODO DE SEGURIDAD PARA EL TOKEN (CRÍTICO)
-  // ===============================================
   getValidToken(): string | null {
     const token = localStorage.getItem('jwt_token');
     if (token && token.split('.').length === 3) {
