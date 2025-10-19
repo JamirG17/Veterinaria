@@ -98,27 +98,34 @@ jobs:
           file: ./Frontend/Dockerfile
           
   deploy_to_vm:
-    runs-on: ubuntu-latest
-    needs: [build_and_push_backend, build_and_push_frontend]
-    steps:
-      - name: Deploy to VM via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: opc
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "--- Descargando nuevas imágenes de Docker Hub ---"
-            cd ~/Veterinaria
-            
-            # 1. Ejecutar pull para traer las nuevas imágenes
-            # El uso de || true evita que el pipeline falle si solo hay cambios en un servicio
-            docker compose pull backend frontend || true 
-            
-            # 2. Recrear los contenedores con las imágenes recién descargadas
-            echo "--- Iniciando reconstrucción y actualización de contenedores ---"
-            docker compose up -d --force-recreate backend frontend
+      runs-on: ubuntu-latest
+      # DEPENDENCIAS: Depende de que las construcciones terminen (sean exitosas o saltadas)
+      needs: [build_and_push_backend, build_and_push_frontend]
+      
+      # CORRECCIÓN CLAVE: Esta condición permite la ejecución si al menos UNA construcción fue exitosa,
+      # ignorando si la otra se saltó ('skipped').
+      if: ${{ always() && (needs.build_and_push_backend.result == 'success' || needs.build_and_push_frontend.result == 'success') }}
+      
+      steps:
+        - name: Deploy to VM via SSH
+          uses: appleboy/ssh-action@v1.0.3
+          with:
+            host: ${{ secrets.SSH_HOST }}
+            username: opc
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            script: |
+              echo "--- Descargando nuevas imágenes de Docker Hub ---"
+              cd ~/Veterinaria
+              
+              # 1. Ejecutar pull para traer las nuevas imágenes
+              # El '|| true' en pull es para evitar que falle si solo hubo un cambio
+              docker compose pull backend frontend || true 
+              
+              # 2. Recrear los contenedores con las imágenes recién descargadas
+              echo "--- Iniciando reconstrucción y actualización de contenedores ---"
+              # Solo recreamos los contenedores de backend y frontend (la DB no cambia)
+              docker compose up -d --force-recreate backend frontend
 
-            # 3. Mostrar el estado de los logs del backend para verificación inmediata
-            echo "--- Verificando el estado del Backend ---"
-            docker compose logs --tail 20 backend
+              # 3. Mostrar el estado de los logs del backend para verificación inmediata
+              echo "--- Verificando el estado del Backend ---"
+              docker compose logs --tail 20 backend
