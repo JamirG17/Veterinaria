@@ -19,7 +19,6 @@ public class Mascota {
     private String nombre;
     private String raza; // Se mantiene como String para flexibilidad
 
-    // --- NUEVOS CAMPOS AÑADIDOS ---
     private String sexo; // "MACHO" o "HEMBRA"
     private boolean esterilizado;
 
