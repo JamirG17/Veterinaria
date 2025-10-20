@@ -44,7 +44,6 @@ public class MascotaController {
     }
 
     @PutMapping("/{id}")
-    // --- LÍNEA DE PRUEBA: Comentamos la seguridad de método temporalmente ---
     @PreAuthorize("hasAnyAuthority('ROL_ADMINISTRADOR', 'ROL_RECEPCIONISTA')")
     public ResponseEntity<Mascota> actualizarMascota(@PathVariable Long id, @RequestBody MascotaDto mascotaDto) {
         try {

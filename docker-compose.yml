@@ -1,12 +1,21 @@
 version: '3.8'
 
+# We define a dedicated network for our application for more stable communication.
+networks:
+  veterinaria-net:
+    driver: bridge
+
 services:
-  database:
+  # The database service, now connected to our dedicated network.
+  # The service name is now 'db'.
+  db:
     platform: linux/amd64 
     image: mysql:8.0
-    container_name: veterinaria_bd
+    container_name: veterinaria_db_container
     restart: always
     command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - veterinaria-net
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} 
       MYSQL_DATABASE: ${DB_NAME}
@@ -23,22 +32,29 @@ services:
       retries: 5
       start_period: 30s
 
+  # The backend service, now connecting to 'db' over the dedicated network.
   backend:
     image: jamirg17/veterinaria-backend:latest
-    container_name: veterinaria_backend
+    container_name: veterinaria_backend_container
     restart: always
+    networks:
+      - veterinaria-net
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/${DB_NAME}
+      # The URL is updated to connect to 'db' and includes compatibility parameters.
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
     depends_on:
-      database:
+      db:
         condition: service_healthy
 
+  # The frontend service, also connected to the dedicated network.
   frontend:
     image: jamirg17/veterinaria-frontend:latest
-    container_name: veterinaria_frontend
+    container_name: veterinaria_frontend_container
     restart: always
+    networks:
+      - veterinaria-net
     ports:
       - "80:80" 
     depends_on:
