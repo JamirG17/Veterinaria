@@ -16,7 +16,7 @@ public class Cita {
     private String motivo;
     private String estado; // Ej: "PROGRAMADA", "EN ESPERA", "EN PROGRESO", "COMPLETADA"
 
-    private String area; // Ej: "VETERINARIA", "GROOMING"
+    private String area;
     private Long citaSiguienteId; // ID de la cita enlazada (si la hay)
 
     @ManyToOne(fetch = FetchType.LAZY)
