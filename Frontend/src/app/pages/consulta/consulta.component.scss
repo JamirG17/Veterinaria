@@ -1,146 +1,253 @@
-@import '../gestion-citas/gestion-citas.component.scss';
-@import '../historial-citas/historial-citas.component.scss';
+// --- ESTILOS BASE (Botones, Modales, Formularios) ---
+$primary-color: #387ADF;
+$secondary-color: #6c757d;
+$success-color: #17b26a;
+$danger-color: #dc3545;
+$light-gray: #f8f9fa;
+$border-color: #e9ecef;
+$text-color: #343A40;
+$light-text-color: #6c757d;
 
-.consulta-header {
-  align-items: flex-start;
-  flex-wrap: wrap; // Permite que los elementos se ajusten
+.page-header {
+  padding: 2rem;
 }
 
-// --- ESTILOS PARA LA FICHA EDITABLE ---
-.pet-summary-card {
-  background: #fff;
-  border-radius: 0.75rem;
-  border: 1px solid #e9ecef;
-  padding: 1.5rem;
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.pet-summary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  h1 { margin: 0; font-size: 1.5rem; }
-}
-
-.pet-summary-body, .pet-edit-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.pet-edit-form {
-  .checkbox-group {
+.btn {
+  padding: 0.7rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &-primary {
+    background-color: $primary-color;
+    color: white;
+    &:hover { background-color: darken($primary-color, 10%); }
+  }
+  &-success {
+    background-color: $success-color;
+    color: white;
+    &:hover { background-color: darken($success-color, 10%); }
+  }
+  &-outline-primary {
+    background-color: transparent;
+    border-color: $primary-color;
+    color: $primary-color;
     display: flex;
     align-items: center;
-    padding-top: 1.5rem; // Alinea con los otros inputs
+    gap: 0.5rem;
+    &:hover {
+      background-color: $primary-color;
+      color: white;
+    }
   }
 }
 
-.edit-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  border-top: 1px solid #e9ecef;
-  padding-top: 1.5rem;
+.form-group {
+  margin-bottom: 1.5rem;
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: $text-color;
+  }
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    resize: vertical;
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba(56, 122, 223, 0.2);
+    }
+  }
 }
 
+.card-body {
+  padding: 1.5rem;
+}
 
-// --- RESTO DE ESTILOS ---
+// --- NUEVO DISEÑO DE PÁGINA ---
+
+// Tarjeta blanca principal
+.content-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  padding: 2.5rem;
+}
+
+.btn-back {
+  //margin-bottom: 1.5rem;
+  background: none;
+  border: none;
+  color: $primary-color;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  &:hover { text-decoration: underline; background-color: transparent; }
+}
+
+// Encabezado dentro de la tarjeta
+.consulta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid $border-color;
+
+  .pet-summary {
+    text-align: left;
+    flex-grow: 1;
+    h1 { 
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 1.75rem;
+    }
+    p { margin: 0; color: $light-text-color; }
+  }
+}
+
+// Títulos de sección
+.section-title {
+  font-size: 1.5rem; 
+  color: $primary-color; 
+  margin: 0 0 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+// Layout de dos columnas
 .consulta-layout {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  gap: 2rem;
+  gap: 2.5rem;
   align-items: flex-start;
-  margin-top: 2rem; // Espacio entre la ficha y el resto del contenido
-}
+  margin-top: 2rem;
 
-@media (max-width: 992px) {
-  .consulta-layout {
+  @media (max-width: 992px) {
     grid-template-columns: 1fr;
   }
 }
 
-.history-list {
-  max-height: 60vh;
-  overflow-y: auto;
-}
-.history-item {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-  &:last-child { border-bottom: none; }
-  .history-date { font-weight: 600; color: #387ADF; margin-bottom: 0.5rem; display: block; }
-  .history-details p { margin: 0 0 0.5rem 0; font-size: 0.9rem; }
-}
-
-.btn-voice {
-  background-color: #f8f9fa;
-  border: 1px solid #ced4da;
-  color: #495057;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  &.active {
-    background-color: #dc3545;
-    color: white;
-    border-color: #dc3545;
-  }
-}
-
-.dictado-feedback {
-  background: #e9ecef;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-top: 1rem;
-  font-style: italic;
-  color: #6c757d;
-}
-
-.consulta-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.btn-success {
-  background-color: #17b26a;
-  color: white;
-}
-
-// --- NUEVOS ESTILOS PARA LA TARJETA DE SALUD ---
-.health-card {
-  margin-top: 1rem;
-  .health-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-  }
-  .health-section {
-    h3 {
+// Columna derecha
+.consulta-column {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .btn-voice {
+      background-color: $light-gray;
+      border: 1px solid #ced4da;
+      color: $text-color;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 1.1rem;
-      margin-top: 0;
-      color: #343A40;
-    }
-    textarea {
-      width: 100%;
-      min-height: 100px;
-    }
-  }
-  .allergies {
-    h3 { color: #d9534f; } // Color de alerta
-    textarea {
-      border-color: #fadadd;
-      &:focus {
-        border-color: #d9534f;
-        box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.2);
+      &.active {
+        background-color: $danger-color;
+        color: white;
+        border-color: $danger-color;
       }
     }
   }
+  .card-body {
+    padding: 0; // El form-group ya tiene margen
+  }
+  .dictado-feedback {
+    background: $light-gray;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-style: italic;
+    color: $light-text-color;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .consulta-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
 }
 
+
+// --- ESTILOS DEL ACORDEÓN DE HISTORIAL ---
+.history-list {
+  padding: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  border: 1px solid $border-color;
+  border-radius: 0.5rem;
+}
+.history-item {
+  border-bottom: 1px solid $border-color;
+  &:last-child { border-bottom: none; }
+}
+.history-summary {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  .history-date { 
+    font-weight: 600; 
+    color: $primary-color; 
+    margin-right: 1rem;
+  }
+  .history-title {
+    font-weight: 600;
+    color: $text-color;
+    flex-grow: 1;
+  }
+  .pi { color: $light-text-color; }
+  &:hover { background-color: $light-gray; }
+}
+.history-details {
+  background-color: $light-gray;
+  padding: 0 1.5rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-out;
+  p { margin: 0 0 0.5rem 0; font-size: 0.9rem; line-height: 1.6; }
+  &.expanded {
+    padding: 1.5rem;
+    max-height: 500px; 
+    p:last-child { margin-bottom: 0; }
+  }
+}
+.empty-message {
+  text-align: center;
+  padding: 2rem;
+  color: $light-text-color;
+}
+
+// Spinner de carga para la IA
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-left-color: $primary-color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

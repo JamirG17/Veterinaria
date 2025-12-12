@@ -1,31 +1,40 @@
-<div class="page-container" *ngIf="citaActual && detallePaciente">
-  <header class="page-header consulta-header">
-    <button class="btn btn-back" (click)="regresar()">
-      <i class="pi pi-arrow-left"></i>
-      <span>Regresar al Dashboard</span>
+<div class="page-header">
+  <button class="btn btn-back" (click)="regresar()">
+    <i class="pi pi-arrow-left"></i>
+    <span>Regresar al Dashboard</span>
     </button>
-    <div class="pet-summary">
-      <h1>Consulta para <strong>{{ detallePaciente.mascota.nombre }}</strong></h1>
-      <p>Propietario: {{ detallePaciente.propietario.nombre }} {{ detallePaciente.propietario.apellido }}</p>
-    </div>
-    <!-- BOTÓN PARA IR A LA FICHA COMPLETA -->
-    <button class="btn btn-outline-primary" (click)="verFichaCompleta()">
-        <i class="pi pi-id-card"></i> Ver Ficha Completa
-    </button>
-  </header>
+</div>
 
-  <!-- El resto del layout de consulta (historial y formulario SOAP) no cambia -->
-  <div class="consulta-layout">
-    <div class="historial-column">
-      <div class="card">
-        <div class="card-header">
-          <h2><i class="pi pi-history"></i> Historial Clínico</h2>
-        </div>
+<div class="page-container" *ngIf="citaActual && detallePaciente">
+
+  <!-- Tarjeta blanca principal que envuelve todo el contenido -->
+  <div class="content-card">
+    <header class="page-header consulta-header">
+      <div class="pet-summary">
+        <h1>Consulta para <strong>{{ detallePaciente.mascota.nombre }}</strong></h1>
+        <p>Propietario: {{ detallePaciente.propietario.nombre }} {{ detallePaciente.propietario.apellido }}</p>
+      </div>
+      <button class="btn btn-outline-primary" (click)="verFichaCompleta()">
+          <i class="pi pi-id-card"></i> Ver Ficha Completa
+      </button>
+    </header>
+
+    <!-- El resto del layout de consulta (historial y formulario SOAP) -->
+    <div class="consulta-layout">
+      
+      <!-- Columna Izquierda: Historial Clínico -->
+      <div class="historial-column">
+        <!-- Eliminamos el .card que estaba aquí -->
+        <h2 class="section-title"><i class="pi pi-history"></i> Historial Clínico</h2>
         <div class="card-body">
           <div *ngIf="detallePaciente.historialClinico.length > 0; else noHistorial" class="history-list">
             <div *ngFor="let registro of detallePaciente.historialClinico" class="history-item">
-              <span class="history-date">{{ registro.fecha | date:'dd/MM/yyyy' }}</span>
-              <div class="history-details">
+              <div class="history-summary" (click)="toggleDetalle(registro.id)">
+                <span class="history-date">{{ registro.fecha | date:'dd/MM/yyyy' }}</span>
+                <span class="history-title">{{ registro.titulo }}</span>
+                <i class="pi" [ngClass]="registroDetallado === registro.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+              </div>
+              <div class="history-details" [class.expanded]="registroDetallado === registro.id">
                 <p><strong>Síntomas/Observaciones:</strong> {{ registro.sintomas }}</p>
                 <p><strong>Diagnóstico:</strong> {{ registro.diagnostico }}</p>
                 <p><strong>Tratamiento:</strong> {{ registro.tratamiento }}</p>
@@ -37,12 +46,13 @@
           </ng-template>
         </div>
       </div>
-    </div>
-    <div class="consulta-column">
-      <div class="card">
-        <div class="card-header">
-          <h2><i class="pi pi-file-edit"></i> Consulta Actual</h2>
-          <button class="btn btn-voice" [class.active]="isDictando" (click)="toggleDictado()">
+
+      <!-- Columna Derecha: Consulta Actual (SOAP) -->
+      <div class="consulta-column">
+        <!-- Eliminamos el .card que estaba aquí -->
+        <div class="section-header">
+          <h2 class="section-title"><i class="pi pi-file-edit"></i> Consulta Actual</h2>
+          <button class="btn btn-voice" [class.active]="isDictando" (click)="toggleDictado()" [disabled]="isAnalizandoIA">
             <i class="pi pi-microphone"></i>
             <span>{{ isDictando ? 'Detener Dictado' : 'Iniciar Dictado' }}</span>
           </button>
@@ -62,20 +72,23 @@
               <textarea rows="4" name="tratamiento" [(ngModel)]="consultaActual.tratamiento" required></textarea>
             </div>
           </form>
-          <div *ngIf="isDictando" class="dictado-feedback">
+          
+          <div *ngIf="isDictando || isAnalizandoIA" class="dictado-feedback">
             <p>{{ textoDictado }}</p>
+            <div *ngIf="isAnalizandoIA" class="spinner"></div>
           </div>
         </div>
-      </div>
-      <div class="consulta-actions">
-        <button class="btn btn-primary" [disabled]="!consultaForm.valid" (click)="guardarYFinalizar(false)">
-          Finalizar Consulta
-        </button>
-        <button class="btn btn-success" [disabled]="!consultaForm.valid" (click)="guardarYFinalizar(true)" *ngIf="citaActual.area === 'AMBOS'">
-          Finalizar y Pasar a Grooming
-        </button>
+          <div class="consulta-actions">
+            <!-- Este botón solo aparece si NO hay una cita siguiente -->
+            <button class="btn btn-primary" [disabled]="!consultaForm.valid || isAnalizandoIA" (click)="guardarYFinalizar(false)" *ngIf="!citaActual?.citaSiguienteId">
+              Finalizar Consulta
+            </button>
+            <!-- Este botón solo aparece si SÍ hay una cita siguiente (es 'AMBOS') -->
+            <button class="btn btn-success" [disabled]="!consultaForm.valid || isAnalizandoIA" (click)="guardarYFinalizar(true)" *ngIf="citaActual?.citaSiguienteId != null">
+              Finalizar y Pasar a Grooming
+            </button>
+          </div>
       </div>
     </div>
   </div>
 </div>
-

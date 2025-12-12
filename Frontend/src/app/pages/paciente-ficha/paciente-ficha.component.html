@@ -1,11 +1,15 @@
-<div class="page-container" *ngIf="detalle">
+<!-- Contenedor principal que será la "página" blanca -->
+<div class="page-header">
   <button class="btn btn-back" (click)="regresar()">
-    <i class="pi pi-arrow-left"></i>
-    <span>Regresar</span>
+     <i class="pi pi-arrow-left"></i>
+     <span>Regresar</span>
   </button>
+</div>
 
-  <!-- Tarjeta de Resumen del Paciente -->
-  <div class="card summary-card">
+<div class="content-card" *ngIf="detalle">
+
+  <!-- Sección de Resumen del Paciente -->
+  <div class="section-container summary-section">
     <div class="summary-header">
       <h1>{{ detalle.mascota.nombre }}</h1>
       <div class="pet-tags">
@@ -22,14 +26,12 @@
     </div>
   </div>
 
-  <!-- Tarjeta de Salud Preventiva y Alertas -->
-  <div class="card health-card">
-    <div class="card-header">
-      <h2><i class="pi pi-shield"></i> Salud Preventiva y Alertas</h2>
-    </div>
-    <div class="card-body health-grid">
-      <!-- Sección de Alergias -->
-      <div class="health-section allergies">
+  <!-- Sección de Salud Preventiva y Alertas -->
+  <div class="section-container health-section">
+    <h2 class="section-title"><i class="pi pi-shield"></i> Salud Preventiva y Alertas</h2>
+    <div class="health-grid">
+      <!-- Alergias -->
+      <div class="health-subsection allergies">
         <div class="section-header">
           <h3><i class="pi pi-exclamation-triangle"></i> Alergias y Condiciones</h3>
           <button *ngIf="!isEditingAlergias" class="btn btn-sm btn-outline" (click)="activarEdicionAlergias()">Editar</button>
@@ -42,8 +44,8 @@
           <button class="btn btn-sm btn-primary" (click)="guardarAlergias()">Guardar</button>
         </div>
       </div>
-      <!-- Sección de Vacunación -->
-      <div class="health-section">
+      <!-- Vacunación -->
+      <div class="health-subsection">
         <div class="section-header">
           <h3><i class="pi pi-syringe"></i> Vacunación</h3>
           <button class="btn btn-sm btn-primary" (click)="abrirModalPrevencion('VACUNA')">Añadir</button>
@@ -56,8 +58,8 @@
           <li *ngIf="vacunas.length === 0" class="empty-item">No hay vacunas registradas.</li>
         </ul>
       </div>
-      <!-- Sección de Desparasitación -->
-      <div class="health-section">
+      <!-- Desparasitación -->
+      <div class="health-subsection">
         <div class="section-header">
           <h3><i class="pi pi-shield-check"></i> Desparasitación</h3>
           <button class="btn btn-sm btn-primary" (click)="abrirModalPrevencion('DESPARASITACION')">Añadir</button>
@@ -73,70 +75,76 @@
     </div>
   </div>
 
-  <!-- Pestañas de Historial -->
-  <div class="tabs">
-    <button class="tab-button" [class.active]="activeTab === 'clinico'" (click)="activeTab = 'clinico'">
-      Historial Clínico ({{ detalle.historialClinico.length }})
-    </button>
-    <button class="tab-button" [class.active]="activeTab === 'grooming'" (click)="activeTab = 'grooming'">
-      Historial Grooming ({{ detalle.historialGrooming.length }})
-    </button>
-    <button class="tab-button" [class.active]="activeTab === 'citas'" (click)="activeTab = 'citas'">
-      Próximas Citas ({{ detalle.proximasCitas.length }})
-    </button>
-  </div>
+  <!-- Sección de Historiales -->
+  <div class="section-container">
+    <h2 class="section-title"><i class="pi pi-history"></i> Historial General</h2>
+    <!-- Pestañas de Historial -->
+    <div class="tabs">
+      <button class="tab-button" [class.active]="activeTab === 'clinico'" (click)="setTab('clinico')">
+        Historial Clínico ({{ detalle.historialClinico.length }})
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 'grooming'" (click)="setTab('grooming')">
+        Historial Grooming ({{ detalle.historialGrooming.length }})
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 'citas'" (click)="setTab('citas')">
+        Próximas Citas ({{ detalle.proximasCitas.length }})
+      </button>
+    </div>
 
-  <!-- Contenido de las Pestañas -->
-  <div class="card tab-content">
-    <div [ngSwitch]="activeTab">
-      <!-- Historial Clínico -->
-      <div *ngSwitchCase="'clinico'" class="history-list">
-        <div *ngIf="detalle.historialClinico.length > 0; else noClinico">
-          <div *ngFor="let registro of detalle.historialClinico" class="history-item">
-            <span class="history-date">{{ registro.fecha | date:'dd/MM/yyyy' }}</span>
-            <div class="history-details">
-              <p><strong>Síntomas/Obs:</strong> {{ registro.sintomas }}</p>
-              <p><strong>Diagnóstico:</strong> {{ registro.diagnostico }}</p>
-              <p><strong>Tratamiento:</strong> {{ registro.tratamiento }}</p>
-            </div>
-          </div>
-        </div>
-        <ng-template #noClinico>
-          <p class="empty-message">No hay registros clínicos anteriores.</p>
-        </ng-template>
-      </div>
-
-      <!-- Historial Grooming -->
-      <div *ngSwitchCase="'grooming'" class="history-list">
-        <div *ngIf="detalle.historialGrooming.length > 0; else noGrooming">
-            <div *ngFor="let cita of detalle.historialGrooming" class="history-item">
-              <span class="history-date">{{ cita.fechaHora | date:'dd/MM/yyyy' }}</span>
-              <div class="history-details">
-                <p><strong>Servicio:</strong> {{ cita.motivo }}</p>
-                <p><strong>Notas:</strong> {{ cita.notasGrooming || 'Sin notas.' }}</p>
+    <!-- Contenido de las Pestañas -->
+    <div class="tab-content">
+      <div [ngSwitch]="activeTab">
+        <!-- Historial Clínico -->
+        <div *ngSwitchCase="'clinico'" class="history-list">
+          <div *ngIf="detalle.historialClinico.length > 0; else noClinico">
+            <div *ngFor="let registro of detalle.historialClinico" class="history-item">
+              <div class="history-summary" (click)="toggleHistorial(registro.id)">
+                <span class="history-date">{{ registro.fecha | date:'dd/MM/yyyy' }}</span>
+                <span class="history-title">{{ registro.titulo }}</span>
+                <i class="pi" [ngClass]="registroExpandidoId === registro.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+              </div>
+              <div class="history-details" [class.expanded]="registroExpandidoId === registro.id">
+                <p><strong>Síntomas/Obs:</strong> {{ registro.sintomas }}</p>
+                <p><strong>Diagnóstico:</strong> {{ registro.diagnostico }}</p>
+                <p><strong>Tratamiento:</strong> {{ registro.tratamiento }}</p>
               </div>
             </div>
+          </div>
+          <ng-template #noClinico><p class="empty-message">No hay registros clínicos.</p></ng-template>
         </div>
-        <ng-template #noGrooming>
-          <p class="empty-message">No hay registros de grooming anteriores.</p>
-        </ng-template>
-      </div>
-
-      <!-- Próximas Citas -->
-      <div *ngSwitchCase="'citas'" class="history-list">
-        <div *ngIf="detalle.proximasCitas.length > 0; else noProximas">
-          <div *ngFor="let cita of detalle.proximasCitas" class="history-item">
-            <span class="history-date">{{ cita.fechaHora | date:'full':'':'es' }}</span>
-            <div class="history-details">
-              <p><strong>Área:</strong> {{ cita.area }}</p>
-              <p><strong>Motivo:</strong> {{ cita.motivo }}</p>
-              <p><strong>Asignado a:</strong> {{ cita.asignadoA.username }}</p>
+        <!-- Historial Grooming -->
+        <div *ngSwitchCase="'grooming'" class="history-list">
+          <div *ngIf="detalle.historialGrooming.length > 0; else noGrooming">
+              <div *ngFor="let cita of detalle.historialGrooming" class="history-item">
+                <div class="history-summary" (click)="toggleGrooming(cita.id)">
+                  <span class="history-date">{{ cita.fechaHora | date:'dd/MM/yyyy' }}</span>
+                  <span class="history-title">{{ cita.motivo }}</span>
+                  <i class="pi" [ngClass]="groomingExpandidoId === cita.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                </div>
+                <div class="history-details" [class.expanded]="groomingExpandidoId === cita.id">
+                  <p><strong>Notas:</strong> {{ cita.notasGrooming || 'Sin notas.' }}</p>
+                </div>
+              </div>
+          </div>
+          <ng-template #noGrooming><p class="empty-message">No hay registros de grooming.</p></ng-template>
+        </div>
+        <!-- Próximas Citas -->
+        <div *ngSwitchCase="'citas'" class="history-list">
+          <div *ngIf="detalle.proximasCitas.length > 0; else noProximas">
+            <div *ngFor="let cita of detalle.proximasCitas" class="history-item">
+              <div class="history-summary" (click)="toggleCita(cita.id)">
+                <span class="history-date">{{ cita.fechaHora | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span class="history-title">{{ cita.motivo }} ({{ cita.area }})</span>
+                <i class="pi" [ngClass]="citaExpandidaId === cita.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+              </div>
+              <div class="history-details" [class.expanded]="citaExpandidaId === cita.id">
+                <p><strong>Asignado a:</strong> {{ cita.asignadoA.username }}</p>
+                <p><strong>Estado:</strong> <span class="status-badge programada">{{ cita.estado }}</span></p>
+              </div>
             </div>
           </div>
+           <ng-template #noProximas><p class="empty-message">No hay citas programadas.</p></ng-template>
         </div>
-         <ng-template #noProximas>
-          <p class="empty-message">No hay citas programadas en el futuro.</p>
-        </ng-template>
       </div>
     </div>
   </div>
@@ -166,4 +174,3 @@
     </form>
   </div>
 </div>
-

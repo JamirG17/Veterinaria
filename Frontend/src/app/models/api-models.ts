@@ -1,4 +1,3 @@
-// Define la estructura de un evento para la librería del calendario
 export interface CalendarEvent {
   start: Date;
   end?: Date;
@@ -7,10 +6,9 @@ export interface CalendarEvent {
     primary: string;
     secondary: string;
   };
-  meta?: any; // Para guardar datos extra como el ID de la cita
+  meta?: any;
 }
 
-// Interfaces que coinciden con los modelos del backend
 
 export interface Usuario {
   id: number;
@@ -38,8 +36,7 @@ export interface Mascota {
   peso: number;
   propietario?: Propietario;
   propietarioId?: number;
-  // --- CAMPO AÑADIDO ---
-  alergias?: string; // Es opcional, por eso el '?'
+  alergias?: string;
 }
 
 export interface Cita {
@@ -51,13 +48,13 @@ export interface Cita {
   asignadoA: Usuario;
   area: string;
   citaSiguienteId?: number;
-  // --- CAMPO AÑADIDO ---
-  notasGrooming?: string; // Es opcional, por eso el '?'
+  notasGrooming?: string;
 }
 
 export interface HistoriaClinica {
   id: number;
   fecha: string;
+  titulo: string;
   sintomas: string;
   diagnostico: string;
   tratamiento: string;
@@ -65,7 +62,6 @@ export interface HistoriaClinica {
   veterinario: Usuario;
 }
 
-// --- NUEVA INTERFAZ ---
 export interface Prevencion {
   id: number;
   tipo: string;
@@ -80,6 +76,13 @@ export interface PacienteDetalle {
   historialClinico: HistoriaClinica[];
   historialGrooming: Cita[];
   proximasCitas: Cita[];
-  prevenciones: Prevencion[]; // <-- AÑADIDO
+  prevenciones: Prevencion[];
+}
+
+export interface AnalisisResponse {
+  titulo: string;
+  sintomas: string;
+  diagnostico: string;
+  tratamiento: string;
 }
 

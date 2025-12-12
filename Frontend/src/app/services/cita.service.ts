@@ -19,24 +19,15 @@ export class CitaService {
   createCita(citaData: any): Observable<Cita> {
     return this.http.post<Cita>(this.apiUrl, citaData);
   }
-  
-  /**
-   * Actualiza una cita existente.
-   */
+
   updateCita(id: number, citaData: any): Observable<Cita> {
     return this.http.put<Cita>(`${this.apiUrl}/${id}`, citaData);
   }
 
-  /**
-   * Actualiza solo el estado de una cita.
-   */
   updateEstadoCita(id: number, estado: string): Observable<Cita> {
     return this.http.patch<Cita>(`${this.apiUrl}/${id}/estado`, { estado });
   }
 
-  /**
-   * Elimina (cancela) una cita.
-   */
   deleteCita(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
@@ -45,7 +36,10 @@ export class CitaService {
     return this.http.get<Cita>(`${this.apiUrl}/${id}`);
   }
 
-  
+  finalizarYPasarAGrooming(citaId: number): Observable<Cita> {
+    return this.http.post<Cita>(`${this.apiUrl}/${citaId}/finalizar-y-pasar`, {});
+  }
+
   getAgendaGroomerHoy(): Observable<Cita[]> {
     return this.http.get<Cita[]>(`${this.apiUrl}/groomer/agenda`);
   }
@@ -58,12 +52,10 @@ export class CitaService {
     return this.http.patch<Cita>(`${this.apiUrl}/${citaId}/notas-grooming`, { notas });
   }
 
-    // --- NUEVO MÉTODO PARA EL HISTORIAL DE GROOMING ---
   getHistorialGroomingCompleto(): Observable<Cita[]> {
     return this.http.get<Cita[]>(`${this.apiUrl}/historial/grooming`);
   }
 
-    // --- NUEVO MÉTODO PARA LA AGENDA DEL VETERINARIO ---
   getAgendaVeterinarioHoy(): Observable<Cita[]> {
     return this.http.get<Cita[]>(`${this.apiUrl}/veterinario/agenda`);
   }

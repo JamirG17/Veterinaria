@@ -12,7 +12,8 @@ import com.utp.veterinaria.repository.CitaRepository;
 import com.utp.veterinaria.repository.MascotaRepository;
 import com.utp.veterinaria.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+// Importación corregida a Spring Framework
+import org.springframework.transaction.annotation.Transactional; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,6 @@ public class CitaService {
                 .orElseThrow(() -> new EntityNotFoundException("Cita no encontrada con ID: " + id));
     }
     
-    // --- MÉTODO FALTANTE AÑADIDO ---
     public CitaResponseDto obtenerDtoPorId(Long id) {
         Cita cita = obtenerPorId(id); // Reutilizamos el método que ya teníamos
         return mapToCitaResponseDto(cita); // Convertimos la entidad a DTO
@@ -62,6 +62,7 @@ public class CitaService {
         citaExistente.setEstado(citaDto.getEstado());
         citaExistente.setMascota(mascota);
         citaExistente.setAsignadoA(asignadoA);
+        citaExistente.setArea(citaDto.getArea());
 
         return citaRepository.save(citaExistente);
     }
@@ -77,24 +78,30 @@ public class CitaService {
         citaRepository.delete(cita);
     }
 
+    // --- MÉTODO ACTUALIZADO ---
     @Transactional
     public Cita crearCita(CitaDto citaDto) {
         if ("AMBOS".equals(citaDto.getArea())) {
-            Cita citaVeterinaria = crearCitaSimple(citaDto, "VETERINARIA", citaDto.getAsignadoAId(), citaDto.getFechaHora());
+            // La cita de veterinaria se crea como 'PROGRAMADA'
+            Cita citaVeterinaria = crearCitaSimple(citaDto, "VETERINARIA", citaDto.getAsignadoAId(), citaDto.getFechaHora(), "PROGRAMADA");
             
             LocalDateTime fechaGrooming = citaDto.getFechaHora().plusHours(1);
-            Cita citaGrooming = crearCitaSimple(citaDto, "GROOMING", citaDto.getAsignadoAGroomingId(), fechaGrooming);
+            // La cita de grooming se crea como 'PENDIENTE_DE_VETERINARIO'
+            Cita citaGrooming = crearCitaSimple(citaDto, "GROOMING", citaDto.getAsignadoAGroomingId(), fechaGrooming, "PENDIENTE_DE_VETERINARIO");
             
             citaVeterinaria.setCitaSiguienteId(citaGrooming.getId());
             citaRepository.save(citaVeterinaria);
             
             return citaVeterinaria;
         } else {
-            return crearCitaSimple(citaDto, citaDto.getArea(), citaDto.getAsignadoAId(), citaDto.getFechaHora());
+            // Si es una cita simple, se crea como 'PROGRAMADA'
+            return crearCitaSimple(citaDto, citaDto.getArea(), citaDto.getAsignadoAId(), citaDto.getFechaHora(), "PROGRAMADA");
         }
     }
 
-    private Cita crearCitaSimple(CitaDto dto, String area, Long asignadoAId, LocalDateTime fecha) {
+    // --- MÉTODO ACTUALIZADO ---
+    // Ahora acepta un 'estado'
+    private Cita crearCitaSimple(CitaDto dto, String area, Long asignadoAId, LocalDateTime fecha, String estado) {
         Mascota mascota = mascotaRepository.findById(dto.getMascotaId())
                 .orElseThrow(() -> new EntityNotFoundException("Mascota no encontrada"));
         
@@ -104,7 +111,7 @@ public class CitaService {
         Cita cita = new Cita();
         cita.setFechaHora(fecha);
         cita.setMotivo(dto.getMotivo());
-        cita.setEstado("PROGRAMADA");
+        cita.setEstado(estado); // Se asigna el estado (ej: "PROGRAMADA" o "PENDIENTE")
         cita.setArea(area);
         cita.setMascota(mascota);
         cita.setAsignadoA(asignadoA);
@@ -112,14 +119,30 @@ public class CitaService {
         return citaRepository.save(cita);
     }
 
+    // --- MÉTODO NUEVO AÑADIDO ---
+    @Transactional
+    public Cita finalizarYPasarAGrooming(Long citaVeterinariaId) {
+        Cita citaVeterinaria = obtenerPorId(citaVeterinariaId);
+        citaVeterinaria.setEstado("COMPLETADA");
+        citaRepository.save(citaVeterinaria);
+
+        if (citaVeterinaria.getCitaSiguienteId() != null) {
+            Cita citaGrooming = obtenerPorId(citaVeterinaria.getCitaSiguienteId());
+            // Activamos la cita de grooming poniéndola "EN ESPERA"
+            citaGrooming.setEstado("EN ESPERA"); 
+            return citaRepository.save(citaGrooming);
+        }
+        
+        return citaVeterinaria;
+    }
+
     public List<CitaResponseDto> obtenerTodasComoDto() {
         return citaRepository.findAll().stream()
                 .map(this::mapToCitaResponseDto)
                 .collect(Collectors.toList());
     }
-  
+ 
     public List<CitaResponseDto> findCitasDeHoyParaGroomerLogueado() {
-        // Obtenemos el username del usuario logueado
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario groomer = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
@@ -130,9 +153,10 @@ public class CitaService {
 
         return citaRepository.findAll().stream()
                 .filter(cita -> cita.getAsignadoA().getId().equals(groomer.getId()) &&
-                                "GROOMING".equals(cita.getArea()) &&
+                                ("GROOMING".equals(cita.getArea()) || "AMBOS".equals(cita.getArea())) &&
                                 !cita.getFechaHora().isBefore(inicioDelDia) &&
                                 !cita.getFechaHora().isAfter(finDelDia))
+                .sorted(Comparator.comparing(Cita::getFechaHora))
                 .map(this::mapToCitaResponseDto)
                 .collect(Collectors.toList());
     }
@@ -142,7 +166,7 @@ public class CitaService {
                 .filter(cita -> "GROOMING".equals(cita.getArea()) &&
                                 cita.getMascota().getId().equals(mascotaId) &&
                                 "COMPLETADA".equals(cita.getEstado()))
-                .sorted(Comparator.comparing(Cita::getFechaHora).reversed()) // De más reciente a más antigua
+                .sorted(Comparator.comparing(Cita::getFechaHora).reversed())
                 .map(this::mapToCitaResponseDto)
                 .collect(Collectors.toList());
     }
@@ -153,7 +177,6 @@ public class CitaService {
         return citaRepository.save(cita);
     }
 
-        // --- MÉTODO NUEVO PARA EL HISTORIAL COMPLETO DE GROOMING ---
     public List<CitaResponseDto> findHistorialGroomingCompleto() {
         return citaRepository.findAll().stream()
                 .filter(cita -> "GROOMING".equals(cita.getArea()) || "AMBOS".equals(cita.getArea()))
@@ -162,7 +185,6 @@ public class CitaService {
                 .collect(Collectors.toList());
     }
 
-        // --- MÉTODO NUEVO PARA LA AGENDA DEL VETERINARIO ---
     public List<CitaResponseDto> findCitasDeHoyParaVeterinarioLogueado() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario veterinario = usuarioRepository.findByUsername(username)
@@ -182,8 +204,8 @@ public class CitaService {
                 .collect(Collectors.toList());
     }
 
-        /**
-     * MÉTODO CORREGIDO: Ahora es público para poder ser usado por otros servicios.
+    /**
+     * MÉTODO CORREGIDO: Ahora es público y añade el citaSiguienteId.
      */
     public CitaResponseDto mapToCitaResponseDto(Cita cita) {
         CitaResponseDto dto = new CitaResponseDto();
@@ -193,6 +215,7 @@ public class CitaService {
         dto.setEstado(cita.getEstado());
         dto.setArea(cita.getArea());
         dto.setAsignadoA(cita.getAsignadoA());
+        dto.setCitaSiguienteId(cita.getCitaSiguienteId()); // <-- LÍNEA AÑADIDA
 
         Mascota mascota = cita.getMascota();
         if (mascota != null) {
@@ -221,4 +244,3 @@ public class CitaService {
         return dto;
     }
 }
-

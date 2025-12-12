@@ -1,9 +1,183 @@
-// Importamos los estilos del historial para reutilizar el diseño de los modales y detalles
-@import '../historial-citas/historial-citas.component.scss';
+// --- ESTILOS BASE (Botones, Modales, Badges) ---
+// Paleta de colores
+$primary-color: #387ADF;
+$secondary-color: #6c757d;
+$success-color: #17b26a;
+$danger-color: #dc3545;
+$warning-color: #f79009;
+$light-gray: #f8f9fa;
+$border-color: #e9ecef;
+$text-color: #343A40;
+$light-text-color: #6c757d;
 
-// Estilos específicos para el Dashboard
+.page-container {
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+    color: #343A40;
+  }
+}
+// Estilos de botones genéricos
+.btn {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &-primary {
+    background-color: $primary-color;
+    color: white;
+    &:hover { background-color: darken($primary-color, 10%); }
+  }
+  &-secondary {
+    background-color: $secondary-color;
+    color: white;
+    &:hover { background-color: darken($secondary-color, 10%); }
+  }
+  &-success {
+    background-color: $success-color;
+    color: white;
+    &:hover { background-color: darken($success-color, 10%); }
+  }
+  &-outline {
+    background-color: #f8f9fa; 
+    border: 1px solid #ced4da; 
+    color: #495057;
+    &:hover { background-color: #e9ecef; }
+  }
+  &-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+.btn-icon {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  line-height: 1;
+  &.btn-close { font-size: 1.5rem; color: $light-text-color; &:hover { color: $text-color; } }
+  &:hover { background-color: rgba(0,0,0,0.05); }
+}
+
+// Estilos de Modales (para el detalle de la cita)
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid $border-color;
+  h2 { margin: 0; font-size: 1.5rem; }
+}
+.detail-body { padding-bottom: 1rem; }
+.detail-section {
+  margin-bottom: 2rem;
+  &:last-child { margin-bottom: 0; }
+  h3 {
+    font-size: 1.1rem;
+    color: $primary-color;
+    border-bottom: 2px solid $border-color;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  span:first-child {
+    font-weight: 600;
+    color: $light-text-color;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+}
+.detail-full-width { grid-column: 1 / -1; }
+
+// Badges de Estado (para las listas)
+.status-badge {
+  padding: 0.25em 0.6em;
+  font-size: 75%;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  color: #fff;
+  &.en-espera { background-color: $warning-color; }
+  &.en-consulta { background-color: $primary-color; }
+  &.en-progreso { background-color: #e57373; }
+  .pi-spinner { margin-right: 0.25rem; }
+}
+
+// --- ESTILOS DEL DASHBOARD ---
+
+// Tarjeta genérica
+.card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid $border-color;
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: $text-color;
+    }
+  }
+  .card-body {
+    padding: 1.5rem;
+  }
+}
+
 .subtitle {
-  color: #6c757d;
+  color: $light-text-color;
   margin-top: -1.5rem;
   margin-bottom: 2rem;
 }
@@ -14,7 +188,6 @@
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
-
 .stat-card {
   background: #fff;
   border-radius: 0.75rem;
@@ -28,34 +201,39 @@
     padding: 1rem;
     border-radius: 50%;
     margin-right: 1.5rem;
-    
-    &.blue { background-color: #e7f1ff; color: #387ADF; }
-    &.orange { background-color: #fff4e5; color: #f79009; }
-    &.green { background-color: #e5f8f0; color: #17b26a; }
+    &.blue { background-color: #e7f1ff; color: $primary-color; }
+    &.orange { background-color: #fff4e5; color: $warning-color; }
+    &.green { background-color: #e5f8f0; color: $success-color; }
   }
-
   .stat-info {
     .value {
       font-size: 2rem;
       font-weight: 700;
       display: block;
-      color: #343A40;
+      color: $text-color;
     }
     .label {
       font-size: 0.9rem;
-      color: #6c757d;
+      color: $light-text-color;
     }
   }
 }
 
 .main-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 1.5rem;
   align-items: flex-start;
 
+  @media (max-width: 1200px) {
+    grid-template-columns: 2fr 1fr;
+    .upcoming-appointments { grid-column: 1 / -1; }
+    .in-clinic-list { grid-column: 1 / 2; }
+    .right-column { grid-column: 2 / 3; }
+  }
   @media (max-width: 992px) {
     grid-template-columns: 1fr;
+    .in-clinic-list, .right-column { grid-column: 1 / -1; }
   }
 }
 
@@ -65,44 +243,83 @@
   gap: 1.5rem;
 }
 
-.upcoming-appointments {
+// Estilo común para listas de citas
+.upcoming-appointments, .in-clinic-list, .ready-for-pickup, .completed-appointments {
+  // Aplicamos los estilos de card-body directamente a la lista si no hay padding
+  .card-body {
+    padding: 0.5rem;
+  }
   ul { list-style: none; padding: 0; margin: 0; }
-
-  .appointment-item {
+  .appointment-item, .pickup-item {
     display: flex;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid #e9ecef;
-    cursor: pointer; // <-- Hacemos la fila clicable
+    border-bottom: 1px solid $border-color;
     transition: background-color 0.2s ease;
     border-radius: 8px;
-
     &:last-child { border-bottom: none; }
-    &:hover { background-color: #f8f9fa; } // <-- Efecto hover
   }
+  .clickable-row {
+    cursor: pointer;
+    &:hover { background-color: $light-gray; }
+  }
+  .empty-message {
+    text-align: center;
+    padding: 2rem;
+    color: $light-text-color;
+  }
+}
 
-  .time { font-weight: 600; font-size: 1.1rem; color: #387ADF; width: 80px; }
+// Próximas Citas
+.upcoming-appointments {
+  .time { font-weight: 600; font-size: 1.1rem; color: $primary-color; width: 80px; }
   .appointment-details {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     .pet-name { font-weight: 600; }
-    .owner-name { font-weight: 400; color: #6c757d; }
+    .owner-name { font-weight: 400; color: $light-text-color; }
     .reason { font-size: 0.9rem; }
-    .vet { font-size: 0.8rem; color: #6c757d; font-style: italic; }
+    .vet { font-size: 0.8rem; color: $light-text-color; font-style: italic; }
   }
   .actions { display: flex; gap: 0.5rem; }
-  .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
-  .btn-outline { background-color: #f8f9fa; border: 1px solid #ced4da; color: #495057; }
-  .btn-success { background-color: #17b26a; color: white; }
 }
 
+// Pacientes en Clínica
+.in-clinic-list {
+  .card-header h2 { color: $warning-color; }
+  .appointment-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+  }
+}
+
+// Listos para Recoger
+.ready-for-pickup {
+  .card-header h2 { color: $success-color; }
+  .pickup-item {
+    justify-content: space-between;
+  }
+  .pet-info { display: flex; flex-direction: column; }
+  .pet-name { font-weight: 600; }
+  .owner-contact { font-size: 0.85rem; color: $light-text-color; }
+}
+
+// Completados y Entregados
+.completed-appointments {
+  .card-header h2 { color: $secondary-color; }
+  .pickup-item { gap: 1rem; }
+  .icon-completed { color: $success-color; font-size: 1.25rem; }
+  .pet-info { flex-grow: 1; }
+  .time-completed { font-size: 0.9rem; color: $light-text-color; font-weight: 500; }
+}
+
+// Accesos Rápidos
 .quick-actions .card-body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .action-button {
   display: flex;
   align-items: center;
@@ -110,35 +327,12 @@
   text-align: left;
   padding: 1rem;
   border-radius: 0.5rem;
-  border: 1px solid #e9ecef;
+  border: 1px solid $border-color;
   background-color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 1rem;
   font-weight: 500;
-
-  i { font-size: 1.25rem; margin-right: 1rem; color: #387ADF; }
-
-  &:hover { background-color: #f8f9fa; border-color: #ced4da; }
+  i { font-size: 1.25rem; margin-right: 1rem; color: $primary-color; }
+  &:hover { background-color: $light-gray; border-color: #ced4da; }
 }
-
-.ready-for-pickup {
-  .pickup-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #e9ecef;
-    &:last-child { border-bottom: none; }
-  }
-  .pet-info { display: flex; flex-direction: column; }
-  .pet-name { font-weight: 600; }
-  .owner-contact { font-size: 0.85rem; color: #6c757d; }
-}
-
-.empty-message {
-  text-align: center;
-  padding: 2rem;
-  color: #6c757d;
-}
-

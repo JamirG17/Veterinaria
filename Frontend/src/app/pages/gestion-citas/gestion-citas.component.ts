@@ -9,6 +9,7 @@ import { UsuarioService } from '../../services/usuario.service';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { isSameDay } from 'date-fns';
+import { ActivatedRoute } from '@angular/router';
 
 registerLocaleData(localeEs);
 
@@ -61,6 +62,7 @@ export class GestionCitasComponent implements OnInit {
     private citaService: CitaService,
     private propietarioService: PropietarioService,
     private usuarioService: UsuarioService,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
     this.generarTodosLosHorarios();
@@ -68,6 +70,11 @@ export class GestionCitasComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDatosIniciales();
+    this.route.queryParams.subscribe(params => {
+      if (params['abrirModal'] === 'true') {
+        this.abrirModalNuevaCita();
+      }
+    });
   }
 
   cargarDatosIniciales(): void {

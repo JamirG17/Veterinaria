@@ -4,7 +4,7 @@
     <p class="subtitle">Resumen de la actividad de hoy</p>
   </header>
 
-  <!-- Tarjetas de Estadísticas -->
+  <!-- Tarjetas de Estadísticas (actualizadas) -->
   <div class="stats-cards">
     <div class="stat-card">
       <i class="pi pi-calendar-plus icon blue"></i>
@@ -16,87 +16,117 @@
     <div class="stat-card">
       <i class="pi pi-clock icon orange"></i>
       <div class="stat-info">
-        <span class="value">{{ stats.enEspera }}</span>
-        <span class="label">Pacientes en Espera</span>
+        <span class="value">{{ stats.enClinica }}</span>
+        <span class="label">Pacientes en Clínica</span>
       </div>
     </div>
     <div class="stat-card">
       <i class="pi pi-check-square icon green"></i>
       <div class="stat-info">
-        <span class="value">{{ stats.completadas }}</span>
-        <span class="label">Citas Completadas</span>
+        <span class="value">{{ stats.finalizados }}</span>
+        <span class="label">Servicios Finalizados</span>
       </div>
     </div>
   </div>
 
-  <!-- Contenedor Principal (Próximas Citas y Accesos Rápidos) -->
+  <!-- Contenedor Principal (Ahora con 3 secciones de listas) -->
   <div class="main-content">
     
-    <!-- Sección de Próximas Citas -->
+    <!-- Sección de Próximas Citas (Solo PROGRAMADAS) -->
     <div class="card upcoming-appointments">
       <div class="card-header">
         <h2>Próximas Citas</h2>
       </div>
       <div class="card-body">
         <ul *ngIf="proximasCitas.length > 0; else noCitas">
-          <!-- CAMBIO: Ahora toda la fila es clicable -->
           <li *ngFor="let cita of proximasCitas" class="appointment-item" (click)="verDetalle(cita)">
             <div class="time">{{ cita.fechaHora | date:'HH:mm' }}</div>
             <div class="appointment-details">
-              <span class="pet-name">{{ cita.mascota.nombre }} <span class="owner-name"> ({{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }})</span></span>
-              <span class="reason">{{ cita.motivo }}</span>
-              <span class="vet">Asignado a: {{ cita.asignadoA.username }}</span>
+              <span class="pet-name">{{ cita.mascota.nombre }} <span class="owner-name"> ({{ cita.mascota.propietario?.nombre }})</span></span>
+              <span class="reason">{{ cita.motivo }} - {{ cita.area }}</span>
             </div>
             <div class="actions">
-              <!-- CAMBIO: Botón "Completar" eliminado y "En Espera" ahora funciona -->
-              <button class="btn btn-sm btn-outline" (click)="marcarComoEnEspera(cita.id, $event)">En Espera</button>
+              <button class="btn btn-sm btn-outline" (click)="marcarComoEnEspera(cita, $event)">Marcar Llegada</button>
             </div>
           </li>
         </ul>
         <ng-template #noCitas>
-          <p class="empty-message">No hay más citas programadas para hoy.</p>
+          <p class="empty-message">No hay más citas programadas.</p>
         </ng-template>
       </div>
     </div>
 
-    <!-- Sección de Accesos Rápidos -->
-    <div class="quick-actions">
-      <div class="card">
-        <div class="card-header">
-          <h2>Accesos Rápidos</h2>
-        </div>
-        <div class="card-body">
-          <button class="action-button" (click)="navegarA('/gestion-citas')">
-            <i class="pi pi-calendar"></i>
-            <span>Ver Calendario Completo</span>
-          </button>
-          <button class="action-button" (click)="navegarA('/pacientes')">
-            <i class="pi pi-users"></i>
-            <span>Gestionar Pacientes</span>
-          </button>
-          <!-- Estos botones necesitarán su lógica de modal en el futuro -->
-          <button class="action-button" (click)="navegarA('/gestion-citas')">
-            <i class="pi pi-plus-circle"></i>
-            <span>Registrar Nueva Cita</span>
-          </button>
-        </div>
+    <!-- SECCIÓN ACTUALIZADA: Pacientes en Clínica -->
+    <div class="card in-clinic-list">
+      <div class="card-header">
+        <h2>Pacientes en Clínica</h2>
+      </div>
+      <div class="card-body">
+        <ul *ngIf="pacientesEnClinica.length > 0; else noEnEspera">
+          <li *ngFor="let cita of pacientesEnClinica" class="appointment-item clickable-row" (click)="verDetalle(cita)">
+            <div class="time">{{ cita.fechaHora | date:'HH:mm' }}</div>
+            <div class="appointment-details">
+              <span class="pet-name">{{ cita.mascota.nombre }}</span>
+              <!-- CAMBIO: Mostramos en qué ÁREA está -->
+              <span class="vet">En: <b>{{ cita.area }}</b> (con {{ cita.asignadoA.username }})</span>
+            </div>
+            <div class="actions">
+              <!-- Muestra el estado dinámico -->
+              <span class="status-badge" [ngClass]="cita.estado.toLowerCase().replace(' ', '-')">
+                <i *ngIf="cita.estado === 'EN CONSULTA' || cita.estado === 'EN PROGRESO'" class="pi pi-spin pi-spinner"></i>
+                {{ cita.estado }}
+              </span>
+            </div>
+          </li>
+        </ul>
+        <ng-template #noEnEspera>
+          <p class="empty-message">No hay pacientes en espera o en consulta.</p>
+        </ng-template>
       </div>
     </div>
-          <!-- NUEVA SECCIÓN: Mascotas Listas para Recoger -->
+    
+    <!-- Contenedor de la columna derecha -->
+    <div class="right-column">
+      <!-- Sección de Accesos Rápidos -->
+      <div class="quick-actions">
+        <div class="card">
+          <div class="card-header">
+            <h2>Accesos Rápidos</h2>
+          </div>
+          <div class="card-body">
+            <button class="action-button" (click)="navegarA('/gestion-citas')">
+              <i class="pi pi-calendar"></i>
+              <span>Ver Calendario Completo</span>
+            </button>
+            <button class="action-button" (click)="navegarA('/pacientes')">
+              <i class="pi pi-users"></i>
+              <span>Gestionar Pacientes</span>
+            </button>
+            <button class="action-button" (click)="navegarA('/gestion-citas?abrirModal=true')">
+              <i class="pi pi-plus-circle"></i>
+              <span>Registrar Nueva Cita</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- SECCIÓN ACTUALIZADA: Mascotas Listas para Recoger -->
       <div class="card ready-for-pickup">
         <div class="card-header">
           <h2>Listas para Recoger</h2>
         </div>
         <div class="card-body">
           <ul *ngIf="mascotasParaRecoger.length > 0; else noListos">
-            <li *ngFor="let cita of mascotasParaRecoger" class="pickup-item">
+            <!-- AÑADIMOS la clase 'clickable-row' y el evento (click) -->
+            <li *ngFor="let cita of mascotasParaRecoger" class="pickup-item clickable-row" (click)="verDetalle(cita)">
               <div class="pet-info">
                 <span class="pet-name">{{ cita.mascota.nombre }}</span>
+                <!-- Corregimos el espacio que faltaba -->
                 <span class="owner-contact">
                   {{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }} - {{ cita.mascota.propietario?.telefono }}
                 </span>
               </div>
-              <button class="btn btn-sm btn-outline">Notificado</button>
+              <button class="btn btn-sm btn-success" (click)="marcarComoEntregado(cita.id, $event)">Marcar Entregado</button>
             </li>
           </ul>
           <ng-template #noListos>
@@ -105,8 +135,34 @@
         </div>
       </div>
 
-  </div>
+      <!-- NUEVA SECCIÓN: Citas Completadas (Entregadas) -->
+      <div class="card completed-appointments">
+        <div class="card-header">
+          <h2>Citas Completadas y Entregadas</h2>
+        </div>
+        <div class="card-body">
+          <ul *ngIf="mascotasEntregadas.length > 0; else noEntregados">
+            <!-- AÑADIMOS la clase 'clickable-row' y el evento (click) -->
+            <li *ngFor="let cita of mascotasEntregadas" class="pickup-item completed-item clickable-row" (click)="verDetalle(cita)">
+              <i class="pi pi-check-circle icon-completed"></i>
+              <div class="pet-info">
+                <span class="pet-name">{{ cita.mascota.nombre }}</span>
+                <!-- AÑADIMOS el teléfono para que sea consistente -->
+                <span class="owner-contact">
+                  {{ cita.mascota.propietario?.nombre }} {{ cita.mascota.propietario?.apellido }} - {{ cita.mascota.propietario?.telefono }}
+                </span>
+              </div>
+              <span class="time-completed">{{ cita.fechaHora | date:'HH:mm' }}</span>
+            </li>
+          </ul>
+          <ng-template #noEntregados>
+            <p class="empty-message">Aún no se ha entregado ningún paciente hoy.</p>
+          </ng-template>
+        </div>
+      </div>
 
+    </div>
+  </div>
 </div>
 
 <!-- NUEVO MODAL PARA VER DETALLE DE CITA -->

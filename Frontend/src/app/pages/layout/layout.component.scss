@@ -1,61 +1,39 @@
 $sidebar-collapsed-width: 80px;
 $sidebar-expanded-width: 260px;
-// Ancho máximo del contenido principal para que se vea centrado y compacto
-$content-max-width: 1300px; // Reducido para forzar el ajuste
+$content-max-width: 1300px;
 
 .layout-container {
   display: flex;
   width: 100vw;
   height: 100vh;
   background-color: #cfeaff;
-  // CRÍTICO: Eliminamos cualquier posible scroll horizontal.
   overflow-x: hidden; 
 }
 
 .content-area {
   height: 100vh;
-  // Permite el scroll vertical si el contenido es largo
   overflow-y: auto; 
-  
-
-  // Padding lateral fijo de 2rem para separar el contenido de los bordes.
   padding-left: 2rem; 
   padding-right: 2rem;  
   
   transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
               width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-
-  // ESTADO PREDETERMINADO (SIDEBAR COLAPSADO: 80px)
-  // Ocupa el 100% del viewport menos los 80px del sidebar fijo.
   width: calc(100% - #{$sidebar-collapsed-width}); 
   margin-left: $sidebar-collapsed-width; 
 }
 
-/* ------------------------------------------------------------------ */
-/* SELECTOR CRÍTICO: Ajusta el contenido cargado por el router-outlet */
-/* ------------------------------------------------------------------ */
 .content-wrapper {
-    // Es clave que este div exista en el HTML envolviendo el router-outlet.
     width: 100%;
     max-width: $content-max-width;
-    // Centra el bloque de contenido dentro del .content-area.
     margin-left: auto;
     margin-right: auto;
-    
-    // SOLUCIÓN AGRESIVA: Garantiza que nada se salga del contenedor.
     overflow: hidden;
-    
-    // Asegura que los elementos internos (como la barra de búsqueda)
-    // no se desborden si usan width: 100%
     box-sizing: border-box; 
     
     padding: 0; 
 }
 
-/* ESTADO EXPANDIDO: Se aplica cuando el layout-container tiene la clase .sidebar-expanded */
 .layout-container.sidebar-expanded .content-area {
-  // Nuevo Ancho: 100% del espacio - 260px del sidebar
   width: calc(100% - #{$sidebar-expanded-width}); 
-  // Nuevo Margen: Empuja el contenido 260px a la derecha
   margin-left: $sidebar-expanded-width;
 }

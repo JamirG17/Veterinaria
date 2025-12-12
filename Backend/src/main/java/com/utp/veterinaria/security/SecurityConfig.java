@@ -50,9 +50,8 @@ public class SecurityConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                // Usamos la IP de tu VM (puerto 80 por Nginx) y localhost
                 registry.addMapping("/**")
-                        .allowedOrigins("http://163.176.213.230", "http://localhost:4200")
+                        .allowedOrigins("http://163.176.213.230","http://20.246.76.68", "http://localhost:4200")
                         .allowedMethods("*") // Incluye GET, POST, OPTIONS, etc.
                         .allowedHeaders("*") // Incluye Authorization, Content-Type, etc.
                         .allowCredentials(true); // Permitimos credenciales

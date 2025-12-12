@@ -1,16 +1,16 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { FormsModule, NgForm } from '@angular/forms'; // Importamos FormsModule
+import { FormsModule, NgForm } from '@angular/forms';
 import { PacienteDetalle, Prevencion } from '../../models/api-models';
 import { PacienteService } from '../../services/paciente.service';
-import { MascotaService } from '../../services/mascota.service'; // Importamos para alergias
-import { PrevencionService } from '../../services/prevencion.service'; // Importamos para prevenciones
+import { MascotaService } from '../../services/mascota.service';
+import { PrevencionService } from '../../services/prevencion.service';
 
 @Component({
   selector: 'app-paciente-ficha',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Añadimos FormsModule
+  imports: [CommonModule, FormsModule],
   templateUrl: './paciente-ficha.component.html',
   styleUrls: ['./paciente-ficha.component.scss']
 })
@@ -19,12 +19,16 @@ export class PacienteFichaComponent implements OnInit {
   detalle: PacienteDetalle | null = null;
   activeTab: 'clinico' | 'grooming' | 'citas' = 'clinico';
 
-  // --- Propiedades para la nueva sección ---
   isEditingAlergias = false;
   alergiasOriginales: string | undefined = '';
 
   showPrevencionModal = false;
-  nuevaPrevencion: Partial<Prevencion> = {}; // Objeto para el nuevo registro
+  nuevaPrevencion: Partial<Prevencion> = {};
+
+  // --- NUEVA PROPIEDAD PARA CONTROLAR EL ACORDEÓN ---
+  registroExpandidoId: number | null = null;
+  groomingExpandidoId: number | null = null;
+  citaExpandidaId: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -47,6 +51,21 @@ export class PacienteFichaComponent implements OnInit {
       this.detalle = data;
       this.cdr.markForCheck();
     });
+  }
+
+  // --- NUEVOS MÉTODOS PARA EL ACORDEÓN ---
+  toggleHistorial(id: number): void {
+    this.registroExpandidoId = this.registroExpandidoId === id ? null : id;
+  }
+  toggleGrooming(id: number): void {
+    this.groomingExpandidoId = this.groomingExpandidoId === id ? null : id;
+  }
+  toggleCita(id: number): void {
+    this.citaExpandidaId = this.citaExpandidaId === id ? null : id;
+  }
+  
+  setTab(tab: 'clinico' | 'grooming' | 'citas'): void {
+    this.activeTab = tab;
   }
 
   // --- Métodos para Alergias ---
@@ -76,7 +95,7 @@ export class PacienteFichaComponent implements OnInit {
     this.nuevaPrevencion = {
       tipo: tipo,
       producto: '',
-      fechaAplicacion: new Date().toISOString().split('T')[0] // Fecha de hoy por defecto
+      fechaAplicacion: new Date().toISOString().split('T')[0]
     };
     this.showPrevencionModal = true;
   }
@@ -88,7 +107,7 @@ export class PacienteFichaComponent implements OnInit {
   guardarPrevencion(form: NgForm): void {
     if (form.invalid || !this.detalle) return;
     this.prevencionService.addPrevencion(this.detalle.mascota.id, this.nuevaPrevencion).subscribe(() => {
-      this.cargarDetalle(this.detalle!.mascota.id); // Recargamos todo
+      this.cargarDetalle(this.detalle!.mascota.id);
       this.cerrarModalPrevencion();
     });
   }
@@ -96,7 +115,7 @@ export class PacienteFichaComponent implements OnInit {
   eliminarPrevencion(prevencionId: number): void {
     if (confirm('¿Está seguro de que desea eliminar este registro?')) {
       this.prevencionService.deletePrevencion(prevencionId).subscribe(() => {
-        this.cargarDetalle(this.detalle!.mascota.id); // Recargamos
+        this.cargarDetalle(this.detalle!.mascota.id);
       });
     }
   }
@@ -126,4 +145,3 @@ export class PacienteFichaComponent implements OnInit {
     this.location.back();
   }
 }
-

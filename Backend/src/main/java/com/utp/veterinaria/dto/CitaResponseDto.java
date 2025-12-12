@@ -14,4 +14,5 @@ public class CitaResponseDto {
     private String area;
     private MascotaConPropietarioDto mascota;
     private Usuario asignadoA;
+    private Long citaSiguienteId; 
 }

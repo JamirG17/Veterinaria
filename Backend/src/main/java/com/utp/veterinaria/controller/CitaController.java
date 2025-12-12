@@ -119,4 +119,11 @@ public class CitaController {
     public ResponseEntity<List<CitaResponseDto>> getAgendaVeterinarioHoy() {
         return ResponseEntity.ok(citaService.findCitasDeHoyParaVeterinarioLogueado());
     }
+
+    @PostMapping("/{id}/finalizar-y-pasar")
+    @PreAuthorize("hasAnyAuthority('ROL_VETERINARIO', 'ROL_ADMINISTRADOR')")
+    public ResponseEntity<Cita> finalizarYPasarAGrooming(@PathVariable Long id) {
+        Cita citaSiguiente = citaService.finalizarYPasarAGrooming(id);
+        return ResponseEntity.ok(citaSiguiente);
+    }
 }

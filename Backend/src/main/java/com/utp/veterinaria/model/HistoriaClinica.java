@@ -14,6 +14,8 @@ public class HistoriaClinica {
 
     private LocalDateTime fecha;
 
+    private String titulo;
+
     @Lob // Para textos largos
     private String sintomas;
 

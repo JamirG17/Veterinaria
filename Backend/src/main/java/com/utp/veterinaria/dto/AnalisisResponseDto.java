@@ -3,11 +3,9 @@ package com.utp.veterinaria.dto;
 import lombok.Data;
 
 @Data
-public class HistoriaClinicaDto {
+public class AnalisisResponseDto {
+    private String titulo;
     private String sintomas;
     private String diagnostico;
     private String tratamiento;
-    private String titulo; 
-    private Long mascotaId;
-    private Long veterinarioId;
 }

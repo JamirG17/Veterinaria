@@ -58,6 +58,7 @@ public class HistoriaClinicaService {
         
         HistoriaClinica historia = new HistoriaClinica();
         historia.setFecha(LocalDateTime.now());
+        historia.setTitulo(historiaDto.getTitulo()); 
         historia.setSintomas(historiaDto.getSintomas());
         historia.setDiagnostico(historiaDto.getDiagnostico());
         historia.setTratamiento(historiaDto.getTratamiento());
