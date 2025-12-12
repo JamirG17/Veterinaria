@@ -1,6 +1,15 @@
-// Estilos generales de la página
+// Variables de colores (reutilizadas para consistencia)
+$primary-color: #387ADF;
+$secondary-color: #6c757d;
+$light-gray: #f8f9fa;
+$border-color: #e9ecef;
+$text-color: #343A40;
+
 .page-container {
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 5rem);
+  padding: 2rem; // Mantenemos el padding original
 }
 
 .page-header {
@@ -8,25 +17,53 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-shrink: 0;
 
   h1 {
     font-size: 2rem;
-    color: #343A40;
+    color: $text-color;
+    font-weight: 600;
+    margin: 0;
   }
 }
 
+// Controles del Calendario
 .calendar-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  flex-shrink: 0;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: $text-color;
+    margin: 0;
+  }
 }
 
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+// Wrapper del Calendario (Estilo Tarjeta)
 .calendar-wrapper {
-  height: 100%; // Altura fija para el calendario
+  flex-grow: 1; 
+  overflow: auto; 
+  min-height: 0;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 1rem;
 }
 
-// Estilos para botones (genéricos)
+// Estilos para botones (genéricos y específicos)
 .btn {
   padding: 0.75rem 1.25rem;
   border: 1px solid transparent;
@@ -34,30 +71,31 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 
   &-primary {
-    background-color: #387ADF;
+    background-color: $primary-color;
     color: white;
-    &:hover { background-color: darken(#387ADF, 10%); }
+    &:hover { background-color: darken($primary-color, 10%); }
   }
   
   &-secondary {
-    background-color: #6c757d;
+    background-color: $secondary-color;
     color: white;
-     &:hover { background-color: darken(#6c757d, 10%); }
+    &:hover { background-color: darken($secondary-color, 10%); }
   }
 
   &-outline-secondary {
     background-color: transparent;
-    border-color: #6c757d;
-    color: #6c757d;
-    &:hover { background-color: #6c757d; color: white; }
+    border-color: $secondary-color;
+    color: $secondary-color;
+    &:hover { 
+      background-color: $secondary-color; 
+      color: white; 
+    }
   }
-}
-
-.btn-group {
-    display: flex;
-    gap: 0.5rem;
 }
 
 // Estilos para el Modal
@@ -67,11 +105,12 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
+  padding: 1rem;
 }
 
 .modal-content {
@@ -80,10 +119,17 @@
   border-radius: 0.75rem;
   width: 100%;
   max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 
   h2 {
     margin-top: 0;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: $text-color;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 1rem;
   }
 }
 
@@ -94,6 +140,8 @@
     display: block;
     font-weight: 600;
     margin-bottom: 0.5rem;
+    color: $text-color;
+    font-size: 0.9rem;
   }
 
   input, select, textarea {
@@ -101,6 +149,24 @@
     padding: 0.75rem;
     border: 1px solid #ced4da;
     border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba(56, 122, 223, 0.2);
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  
+  .form-group {
+    flex: 1;
   }
 }
 
@@ -109,41 +175,36 @@
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid $border-color;
 }
 
 // --- ESTILOS AÑADIDOS PARA EL MENSAJE DE ÉXITO ---
 .success-alert {
   background-color: #d4edda;
   color: #155724;
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   margin-bottom: 1.5rem;
   border: 1px solid #c3e6cb;
   border-radius: 0.5rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   animation: fadeInOut 3s ease-in-out forwards;
+
+  i { font-size: 1.25rem; }
 }
 
 @keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  15% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  85% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
 }
 
-// --- NUEVOS ESTILOS PARA EL FORMULARIO MEJORADO ---
+// --- NUEVOS ESTILOS PARA EL FORMULARIO MEJORADO (BÚSQUEDA) ---
 .owner-search-group {
   position: relative;
   
@@ -159,37 +220,136 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    z-index: 2100; // Por encima del modal
-    max-height: 150px;
+    z-index: 10;
+    max-height: 200px;
     overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     
     li {
-      padding: 0.75rem;
+      padding: 0.75rem 1rem;
       cursor: pointer;
-      &:hover {
-        background-color: #f8f9fa;
-      }
+      border-bottom: 1px solid $light-gray;
+      font-size: 0.95rem;
+      color: $text-color;
+
+      &:hover { background-color: $light-gray; }
+      &:last-child { border-bottom: none; }
+    }
+    
+    // Estilo especial para la opción "Crear Nuevo"
+    .create-new-option {
+      color: $primary-color;
+      font-weight: 600;
+      background-color: #f0f7ff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      &:hover { background-color: #e0efff; }
     }
   }
 }
 
-.form-row {
-  display: flex;
-  gap: 1.5rem;
+.custom-select-container {
+  position: relative;
   
-  .form-group {
-    flex: 1;
+  .breed-search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .breed-options-list {
+    display: none; // Oculto por defecto
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+    max-height: 200px; 
+    overflow-y: auto;
+
+    li {
+      padding: 0.75rem;
+      cursor: pointer;
+      &:hover { background-color: #f8f9fa; }
+    }
+  }
+
+  .breed-search-input:focus + .breed-options-list,
+  .breed-options-list:hover {
+    display: block;
   }
 }
 
-// --- ESTILOS CORREGIDOS PARA EL MODAL ---
-.modal-backdrop {
-  // Añadimos padding para que el modal no toque los bordes en pantallas pequeñas
-  padding: 1rem; 
+.label-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+
+  label {
+    margin-bottom: 0;
+  }
+
+  .btn-link {
+    background: none;
+    border: none;
+    color: $primary-color;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+
+    i {
+      font-size: 0.8rem;
+    }
+  }
 }
 
-.modal-content {
-  // Añadimos una altura máxima y scroll vertical
-  max-height: 90vh;
-  overflow-y: auto;
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  input[type="checkbox"] {
+    width: auto; // Sobrescribe el width: 100% genérico de inputs
+    margin: 0;
+  }
+}
+
+.z-index-high {
+  z-index: 3000 !important; // Más alto que el z-index 2000 del modal base
+  background-color: rgba(0, 0, 0, 0.7); // Un poco más oscuro para distinguir profundidad
+}
+
+.text-warning {
+    color: #f59e0b;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: block;
+    font-weight: 500;
 }

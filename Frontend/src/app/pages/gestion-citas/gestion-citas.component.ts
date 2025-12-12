@@ -1,15 +1,19 @@
 import { Component, OnInit, ChangeDetectorRef, LOCALE_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { CalendarModule, CalendarView, CalendarEvent } from 'angular-calendar';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+import { isSameDay } from 'date-fns';
+
 import { Cita, Mascota, Propietario, Usuario } from '../../models/api-models';
 import { CitaService } from '../../services/cita.service';
 import { PropietarioService } from '../../services/propietario.service';
 import { UsuarioService } from '../../services/usuario.service';
-import { registerLocaleData } from '@angular/common';
-import localeEs from '@angular/common/locales/es';
-import { isSameDay } from 'date-fns';
-import { ActivatedRoute } from '@angular/router';
+import { MascotaService } from '../../services/mascota.service';
+// --- IMPORTAMOS EL SERVICIO DE RAZAS ---
+import { RazaService, Raza } from '../../services/raza.service';
 
 registerLocaleData(localeEs);
 
@@ -28,12 +32,24 @@ export class GestionCitasComponent implements OnInit {
   viewDate: Date = new Date();
   events: CalendarEvent[] = [];
   
-  // --- PROPIEDADES AÑADIDAS PARA CONFIGURAR LAS HORAS VISIBLES ---
-  dayStartHour: number = 7; // El calendario mostrará desde las 7 AM
-  dayEndHour: number = 20;  // El calendario mostrará hasta las 8 PM
+  dayStartHour: number = 7;
+  dayEndHour: number = 20;
 
   showModal = false;
   successMessage: string | null = null;
+  
+  showOwnerModal = false;
+  nuevoPropietario: Propietario = { id: 0, nombre: '', apellido: '', dni: '', telefono: '', email: '', mascotas: [] };
+  
+  showPetModal = false;
+  nuevaMascotaRapida: Mascota = this.inicializarMascota();
+
+  // --- VARIABLES PARA EL SELECTOR DE RAZAS ---
+  razas: Raza[] = [];
+  razasFiltradas: Raza[] = [];
+  razaSearchTerm: string = '';
+  mostrarInputNuevaRaza = false;
+  nuevaRazaNombre = '';
   
   propietarios: Propietario[] = [];
   propietarioSearchTerm = '';
@@ -61,7 +77,9 @@ export class GestionCitasComponent implements OnInit {
   constructor(
     private citaService: CitaService,
     private propietarioService: PropietarioService,
+    private mascotaService: MascotaService,
     private usuarioService: UsuarioService,
+    private razaService: RazaService, // <-- INYECTAMOS EL SERVICIO
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
@@ -85,18 +103,67 @@ export class GestionCitasComponent implements OnInit {
         color: { primary: '#387ADF', secondary: '#D1E1F8' },
         meta: cita,
       }));
-      // Llamamos a actualizar horarios aquí para que se calcule con los datos frescos
       this.actualizarHorariosDisponibles(); 
       this.cdr.markForCheck();
     });
-    this.propietarioService.getPropietarios().subscribe((data: Propietario[]) => this.propietarios = data);
+
+    this.cargarPropietarios();
+    this.cargarRazas(); // <-- CARGAMOS LAS RAZAS AL INICIO
+    
     this.usuarioService.getVeterinarios().subscribe((data: Usuario[]) => {
       this.veterinarios = data;
       this.onAreaChange();
     });
+    
     this.usuarioService.getGroomers().subscribe((data: Usuario[]) => this.groomers = data);
   }
 
+  cargarPropietarios(): void {
+    this.propietarioService.getPropietarios().subscribe((data: Propietario[]) => this.propietarios = data);
+  }
+
+  // --- MÉTODOS PARA GESTIONAR RAZAS ---
+  cargarRazas(): void {
+    this.razaService.getRazas().subscribe(data => {
+      this.razas = data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      this.razasFiltradas = this.razas;
+    });
+  }
+
+  filtrarRazas(): void {
+    if (!this.razaSearchTerm) {
+      this.razasFiltradas = this.razas;
+    } else {
+      const term = this.razaSearchTerm.toLowerCase();
+      this.razasFiltradas = this.razas.filter(r => r.nombre.toLowerCase().includes(term));
+    }
+  }
+
+  seleccionarRaza(razaNombre: string): void {
+    if (razaNombre === 'otra') {
+      this.mostrarInputNuevaRaza = true;
+      this.razaSearchTerm = '';
+    } else {
+      this.nuevaMascotaRapida.raza = razaNombre;
+      this.razaSearchTerm = razaNombre;
+      this.mostrarInputNuevaRaza = false;
+    }
+  }
+
+  guardarNuevaRaza(): void {
+    if (this.nuevaRazaNombre.trim()) {
+      this.razaService.createRaza({ nombre: this.nuevaRazaNombre }).subscribe(nuevaRaza => {
+        this.cargarRazas();
+        this.nuevaMascotaRapida.raza = nuevaRaza.nombre;
+        this.razaSearchTerm = nuevaRaza.nombre;
+        this.mostrarInputNuevaRaza = false;
+        this.nuevaRazaNombre = '';
+        this.cdr.markForCheck();
+      });
+    }
+  }
+
+  // --- Resto de métodos de búsqueda y flujo ---
   buscarPropietario(): void {
     if (this.propietarioSearchTerm.length < 2) {
       this.propietariosEncontrados = [];
@@ -117,21 +184,86 @@ export class GestionCitasComponent implements OnInit {
     this.propietariosEncontrados = [];
   }
 
+  iniciarCreacionPropietario(): void {
+    this.nuevoPropietario = { 
+      id: 0, nombre: '', apellido: '', dni: this.propietarioSearchTerm, telefono: '', email: '', mascotas: [] 
+    };
+    this.propietariosEncontrados = [];
+    this.showOwnerModal = true;
+  }
+
+  cerrarModalPropietario(): void {
+    this.showOwnerModal = false;
+  }
+
+  guardarNuevoPropietario(form: NgForm): void {
+    if (form.invalid) return;
+    this.propietarioService.createPropietario(this.nuevoPropietario).subscribe(propGuardado => {
+      this.cargarPropietarios();
+      this.seleccionarPropietario(propGuardado);
+      this.cerrarModalPropietario();
+      this.mostrarMensajeExito('Propietario creado y seleccionado.');
+    });
+  }
+
+  iniciarCreacionMascota(): void {
+    if (!this.propietarioSeleccionado) return;
+    
+    this.nuevaMascotaRapida = this.inicializarMascota();
+    this.nuevaMascotaRapida.propietarioId = this.propietarioSeleccionado.id;
+    
+    // Reseteamos el buscador de razas
+    this.razaSearchTerm = '';
+    this.filtrarRazas();
+    this.mostrarInputNuevaRaza = false;
+    
+    this.showPetModal = true;
+  }
+
+  cerrarModalMascota(): void {
+    this.showPetModal = false;
+  }
+
+  guardarNuevaMascota(form: NgForm): void {
+    if (form.invalid) return;
+    
+    // Si escribió una raza pero no la seleccionó, la usamos
+    if (this.razaSearchTerm && this.nuevaMascotaRapida.raza !== this.razaSearchTerm) {
+         this.nuevaMascotaRapida.raza = this.razaSearchTerm;
+    }
+
+    const mascotaDto = {
+      ...this.nuevaMascotaRapida,
+      propietarioId: this.propietarioSeleccionado!.id
+    };
+
+    this.mascotaService.createMascota(mascotaDto).subscribe(mascotaGuardada => {
+      this.mascotasDelPropietario.push(mascotaGuardada);
+      this.nuevaCita.mascotaId = mascotaGuardada.id;
+      this.cerrarModalMascota();
+      this.mostrarMensajeExito('Mascota creada y seleccionada.');
+    });
+  }
+
+  private inicializarMascota(): Mascota {
+    return {
+      id: 0, nombre: '', raza: '', sexo: 'MACHO', esterilizado: false,
+      fechaNacimiento: '', peso: 0, propietarioId: 0
+    };
+  }
+
   generarTodosLosHorarios(): void {
     for (let i = 7; i <= 19; i++) {
       this.todosLosHorarios.push(`${i.toString().padStart(2, '0')}:00`);
     }
   }
 
-  // --- MÉTODO CORREGIDO Y REFORZADO ---
   actualizarHorariosDisponibles(): void {
     if (!this.nuevaCita.fecha) {
       this.horariosDisponibles = [];
       return;
     }
 
-    // El input 'date' devuelve 'YYYY-MM-DD'. new Date() lo interpreta como UTC.
-    // Para evitar problemas de zona horaria, dividimos el string y creamos la fecha localmente.
     const [year, month, day] = this.nuevaCita.fecha.split('-').map(Number);
     const fechaSeleccionada = new Date(year, month - 1, day);
 
@@ -139,30 +271,20 @@ export class GestionCitasComponent implements OnInit {
         isSameDay(event.start, fechaSeleccionada)
     );
 
-    // Un slot de veterinaria está ocupado si el área es VETERINARIA o AMBOS
     const horasOcupadasVeterinaria = citasDelDia
         .filter(e => e.meta.area === 'VETERINARIA' || e.meta.area === 'AMBOS')
         .map(e => e.start.getHours());
 
-    // Un slot de grooming está ocupado si el área es GROOMING o AMBOS
     const horasOcupadasGrooming = citasDelDia
         .filter(e => e.meta.area === 'GROOMING' || e.meta.area === 'AMBOS')
         .map(e => e.start.getHours());
 
     this.horariosDisponibles = this.todosLosHorarios.filter(horaStr => {
         const hora = parseInt(horaStr.split(':')[0]);
-
-        if (this.nuevaCita.area === 'VETERINARIA') {
-            return !horasOcupadasVeterinaria.includes(hora);
-        }
-        if (this.nuevaCita.area === 'GROOMING') {
-            return !horasOcupadasGrooming.includes(hora);
-        }
-        if (this.nuevaCita.area === 'AMBOS') {
-            // Para "AMBOS", el horario debe estar libre en ambos servicios
-            return !horasOcupadasVeterinaria.includes(hora) && !horasOcupadasGrooming.includes(hora);
-        }
-        return true; // No debería ocurrir
+        if (this.nuevaCita.area === 'VETERINARIA') return !horasOcupadasVeterinaria.includes(hora);
+        if (this.nuevaCita.area === 'GROOMING') return !horasOcupadasGrooming.includes(hora);
+        if (this.nuevaCita.area === 'AMBOS') return !horasOcupadasVeterinaria.includes(hora) && !horasOcupadasGrooming.includes(hora);
+        return true;
     });
     this.cdr.markForCheck();
   }
@@ -209,6 +331,7 @@ export class GestionCitasComponent implements OnInit {
   setView(view: CalendarView) { this.view = view; }
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {}
   cerrarModal(): void { this.showModal = false; }
+  
   mostrarMensajeExito(message: string): void {
     this.successMessage = message;
     this.cdr.markForCheck();
@@ -218,4 +341,3 @@ export class GestionCitasComponent implements OnInit {
     }, 3000);
   }
 }
-

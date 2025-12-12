@@ -16,15 +16,9 @@
   <!-- Controles del Calendario -->
   <div class="calendar-controls">
     <div class="btn-group">
-      <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate">
-        Anterior
-      </div>
-      <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate">
-        Hoy
-      </div>
-      <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate">
-        Siguiente
-      </div>
+      <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate">Anterior</div>
+      <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate">Hoy</div>
+      <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate">Siguiente</div>
     </div>
     <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'es' }}</h3>
     <div class="btn-group">
@@ -36,67 +30,47 @@
 
   <!-- Calendario -->
   <div [ngSwitch]="view" class="calendar-wrapper">
-    <mwl-calendar-month-view
-      *ngSwitchCase="'month'"
-      [viewDate]="viewDate"
-      [events]="events"
-      (dayClicked)="dayClicked($event.day)">
-    </mwl-calendar-month-view>
-
-    <!-- VISTA DE SEMANA CORREGIDA -->
-    <mwl-calendar-week-view
-      *ngSwitchCase="'week'"
-      [viewDate]="viewDate"
-      [events]="events"
-      [dayStartHour]="dayStartHour"
-      [dayEndHour]="dayEndHour">
-    </mwl-calendar-week-view>
-
-    <!-- VISTA DE DÍA CORREGIDA -->
-    <mwl-calendar-day-view
-      *ngSwitchCase="'day'"
-      [viewDate]="viewDate"
-      [events]="events"
-      [dayStartHour]="dayStartHour"
-      [dayEndHour]="dayEndHour">
-    </mwl-calendar-day-view>
+    <mwl-calendar-month-view *ngSwitchCase="'month'" [viewDate]="viewDate" [events]="events" (dayClicked)="dayClicked($event.day)"></mwl-calendar-month-view>
+    <mwl-calendar-week-view *ngSwitchCase="'week'" [viewDate]="viewDate" [events]="events" [dayStartHour]="dayStartHour" [dayEndHour]="dayEndHour"></mwl-calendar-week-view>
+    <mwl-calendar-day-view *ngSwitchCase="'day'" [viewDate]="viewDate" [events]="events" [dayStartHour]="dayStartHour" [dayEndHour]="dayEndHour"></mwl-calendar-day-view>
   </div>
-
 </div>
 
-<!-- Modal para Nueva Cita (Reestructurado) -->
+<!-- Modal para Nueva Cita -->
 <div class="modal-backdrop" *ngIf="showModal">
   <div class="modal-content">
     <h2>Nueva Cita</h2>
     <form #citaForm="ngForm" (ngSubmit)="guardarCita(citaForm)">
         
-        <!-- Paso 1: Buscar Propietario -->
         <div class="form-group owner-search-group">
           <label for="owner-search">Buscar Propietario (por DNI o Nombre)</label>
-          <input 
-            type="text" 
-            id="owner-search"
-            name="owner-search"
-            [(ngModel)]="propietarioSearchTerm"
-            (input)="buscarPropietario()"
-            placeholder="Escribe para buscar..."
-            autocomplete="off">
-          <ul *ngIf="propietariosEncontrados.length > 0" class="search-results">
+          <input type="text" id="owner-search" name="owner-search" [(ngModel)]="propietarioSearchTerm" (input)="buscarPropietario()" placeholder="Escribe para buscar..." autocomplete="off">
+          <ul class="search-results" *ngIf="propietarioSearchTerm && !propietarioSeleccionado">
+            <li class="create-new-option" (click)="iniciarCreacionPropietario()" *ngIf="propietariosEncontrados.length === 0">
+               <i class="pi pi-plus"></i> Registrar nuevo: "{{ propietarioSearchTerm }}"
+            </li>
             <li *ngFor="let p of propietariosEncontrados" (click)="seleccionarPropietario(p)">
               {{ p.nombre }} {{ p.apellido }} - {{ p.dni }}
             </li>
           </ul>
         </div>
         
-        <!-- Paso 2: Seleccionar Mascota (solo si hay propietario seleccionado) -->
         <div class="form-group" *ngIf="propietarioSeleccionado">
-            <label for="mascota">Mascota</label>
-            <select id="mascota" name="mascota" [(ngModel)]="nuevaCita.mascotaId" required>
+            <div class="label-with-action">
+              <label for="mascota">Mascota</label>
+              <button type="button" class="btn-link" (click)="iniciarCreacionMascota()">
+                <i class="pi pi-plus"></i> Registrar Mascota
+              </button>
+            </div>
+            <select id="mascota" name="mascota" [(ngModel)]="nuevaCita.mascotaId" required [disabled]="mascotasDelPropietario.length === 0">
+                <option [ngValue]="null" disabled selected>Seleccione una mascota...</option>
                 <option *ngFor="let mascota of mascotasDelPropietario" [value]="mascota.id">{{mascota.nombre}} ({{mascota.raza}})</option>
             </select>
+            <small *ngIf="mascotasDelPropietario.length === 0" class="text-warning">
+               Este propietario no tiene mascotas registradas. Agrega una para continuar.
+            </small>
         </div>
         
-        <!-- El resto del formulario solo se muestra si hay una mascota seleccionada -->
         <ng-container *ngIf="nuevaCita.mascotaId">
           <div class="form-group">
               <label for="area">Área de Servicio</label>
@@ -106,29 +80,23 @@
                   <option value="AMBOS">Ambos</option>
               </select>
           </div>
-          
           <div class="form-group">
               <label for="profesional">Asignado a ({{ nuevaCita.area === 'GROOMING' ? 'Groomer' : 'Veterinario' }})</label>
               <select id="profesional" name="profesional" [(ngModel)]="nuevaCita.asignadoAId" required>
                   <option *ngFor="let prof of profesionalesFiltrados" [value]="prof.id">{{prof.username}}</option>
               </select>
           </div>
-          
           <div class="form-group" *ngIf="nuevaCita.area === 'AMBOS'">
               <label for="groomer">Asignado a (Grooming)</label>
               <select id="groomer" name="groomer" [(ngModel)]="nuevaCita.asignadoAGroomingId" required>
                   <option *ngFor="let groomer of groomers" [value]="groomer.id">{{groomer.username}}</option>
               </select>
           </div>
-          
           <div class="form-row">
-            <!-- Paso 3: Seleccionar Fecha -->
             <div class="form-group">
                 <label for="fecha">Día de la Cita</label>
                 <input type="date" id="fecha" name="fecha" [(ngModel)]="nuevaCita.fecha" (change)="actualizarHorariosDisponibles()" required>
             </div>
-            
-            <!-- Paso 4: Seleccionar Horario Disponible -->
             <div class="form-group">
                 <label for="hora">Horario de Inicio</label>
                 <select id="hora" name="hora" [(ngModel)]="nuevaCita.hora" required [disabled]="horariosDisponibles.length === 0">
@@ -137,7 +105,6 @@
                 </select>
             </div>
           </div>
-
           <div class="form-group">
               <label for="motivo">Motivo de la Cita</label>
               <textarea id="motivo" name="motivo" rows="3" [(ngModel)]="nuevaCita.motivo" required></textarea>
@@ -152,3 +119,109 @@
   </div>
 </div>
 
+<!-- Modal para Registrar Propietario Rápido -->
+<div class="modal-backdrop z-index-high" *ngIf="showOwnerModal">
+  <div class="modal-content">
+    <h2>Registrar Nuevo Propietario</h2>
+    <form #newOwnerForm="ngForm" (ngSubmit)="guardarNuevoPropietario(newOwnerForm)">
+      <div class="form-group">
+        <label>DNI</label>
+        <input type="text" name="dni" [(ngModel)]="nuevoPropietario.dni" required>
+      </div>
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" name="nombre" [(ngModel)]="nuevoPropietario.nombre" required>
+      </div>
+      <div class="form-group">
+        <label>Apellido</label>
+        <input type="text" name="apellido" [(ngModel)]="nuevoPropietario.apellido" required>
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" name="telefono" [(ngModel)]="nuevoPropietario.telefono" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" [(ngModel)]="nuevoPropietario.email" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalPropietario()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!newOwnerForm.valid">Guardar y Seleccionar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal para Registrar Mascota Rápida (ACTUALIZADO CON SELECTOR DE RAZA) -->
+<div class="modal-backdrop z-index-high" *ngIf="showPetModal">
+  <div class="modal-content">
+    <h2>Registrar Mascota para {{ propietarioSeleccionado?.nombre }}</h2>
+    <form #newPetForm="ngForm" (ngSubmit)="guardarNuevaMascota(newPetForm)">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" name="nombre" [(ngModel)]="nuevaMascotaRapida.nombre" required>
+      </div>
+
+      <!-- SELECTOR DE RAZA CON BÚSQUEDA INTEGRADO -->
+      <div class="form-group">
+        <label>Raza</label>
+        <div class="custom-select-container">
+          <input 
+            type="text" 
+            class="breed-search-input"
+            placeholder="Buscar o seleccionar raza..."
+            [(ngModel)]="razaSearchTerm"
+            (ngModelChange)="filtrarRazas()"
+            name="razaSearch"
+            autocomplete="off">
+          
+          <ul class="breed-options-list">
+            <li (click)="seleccionarRaza('otra')">Otra...</li>
+            <li *ngFor="let r of razasFiltradas" (click)="seleccionarRaza(r.nombre)">
+              {{ r.nombre }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="form-group" *ngIf="mostrarInputNuevaRaza">
+        <label>Nombre de la Nueva Raza</label>
+        <div class="input-with-button">
+          <input type="text" name="nuevaRaza" [(ngModel)]="nuevaRazaNombre">
+          <button type="button" class="btn btn-sm btn-primary" (click)="guardarNuevaRaza()">Guardar Raza</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sexo</label>
+          <select name="sexo" [(ngModel)]="nuevaMascotaRapida.sexo" required>
+            <option value="MACHO">Macho</option>
+            <option value="HEMBRA">Hembra</option>
+          </select>
+        </div>
+        <div class="form-group">
+           <label>Peso (kg)</label>
+           <input type="number" name="peso" [(ngModel)]="nuevaMascotaRapida.peso" required>
+        </div>
+      </div>
+
+      <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" name="esterilizado" [(ngModel)]="nuevaMascotaRapida.esterilizado"> 
+            Esterilizado/a
+          </label>
+      </div>
+
+      <div class="form-group">
+        <label>Fecha de Nacimiento</label>
+        <input type="date" name="fechaNacimiento" [(ngModel)]="nuevaMascotaRapida.fechaNacimiento" required>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalMascota()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!newPetForm.valid">Guardar y Seleccionar</button>
+      </div>
+    </form>
+  </div>
+</div>
